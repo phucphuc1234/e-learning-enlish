@@ -1,0 +1,19 @@
+{
+  "users": 100,
+  "programs": 11,
+  "courses": 33,
+  "lessons": 198,
+  "exercises": 396,
+  "questions": 1980,
+  "answers": 3564,
+  "exams": 99,
+  "exam_questions": 1980,
+  "enrollments": 264,
+  "progress": 1038,
+  "attempts": 703,
+  "notifications": 276,
+  "learning_paths": 11,
+  "path_courses": 33,
+  "study_sessions": 2076,
+  "learning_reports": 528
+}
