@@ -4,8 +4,10 @@ import { once } from "node:events";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
 import { createApp } from "../server/app.js";
 import { seedDemo } from "../server/seed.js";
+import { openDatabase } from "../server/database.js";
 
 async function fixture(t, filename = ":memory:") {
   const app = createApp({ filename, disableRateLimit: true });
@@ -65,6 +67,40 @@ async function fixture(t, filename = ":memory:") {
     store: app.locals.store,
   };
 }
+
+test("demo seed CLI handles Windows and POSIX entry paths without duplicating data", (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "english-seed-cli-"));
+  const filename = join(dir, "seed.sqlite");
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const seedUrl = new URL("../server/seed.js", import.meta.url).href;
+  for (const entryPath of [
+    "/project/server/seed.js",
+    "C:\\project\\server\\seed.js",
+  ]) {
+    const script = `process.argv[1] = ${JSON.stringify(entryPath)}; await import(${JSON.stringify(seedUrl)});`;
+    const result = spawnSync(
+      process.execPath,
+      ["--input-type=module", "-e", script],
+      {
+        env: {
+          ...process.env,
+          NODE_ENV: "development",
+          DATABASE_PATH: filename,
+        },
+        encoding: "utf8",
+      },
+    );
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Demo data ready/);
+    const store = openDatabase(filename);
+    try {
+      assert.equal(store.get("SELECT COUNT(*) AS n FROM users").n, 3);
+      assert.equal(store.get("SELECT COUNT(*) AS n FROM courses").n, 3);
+    } finally {
+      store.db.close();
+    }
+  }
+});
 
 test("health and public catalog work; protected endpoints require authentication", async (t) => {
   const { request } = await fixture(t);

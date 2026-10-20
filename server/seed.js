@@ -178,7 +178,7 @@ export function seedDemo(store) {
   });
 }
 
-if (process.argv[1]?.endsWith("/seed.js")) {
+if (process.argv[1]?.replaceAll("\\", "/").endsWith("/seed.js")) {
   const store = openDatabase();
   try {
     seedDemo(store);
