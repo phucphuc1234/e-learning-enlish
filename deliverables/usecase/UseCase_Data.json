@@ -1,0 +1,1434 @@
+{
+  "baseline": "a85ded9268a850f8e852bcfaa9de031bd855f024",
+  "date": "2026-10-20",
+  "actors": {
+    "KH": "Khách",
+    "HV": "Học viên",
+    "GV": "Giáo viên",
+    "AD": "Quản trị viên"
+  },
+  "usecases": [
+    {
+      "id": "UC01",
+      "n": 1,
+      "name": "Đăng ký tài khoản",
+      "actors": [
+        "KH"
+      ],
+      "summary": "Khách tạo tài khoản học viên để tham gia học tập trên hệ thống.",
+      "pre": "Khách chưa đăng nhập; có thể truy cập trang Đăng ký.",
+      "post": "Thành công: tạo tài khoản vai trò học viên, thông báo chào mừng và phiên đăng nhập; giao diện chuyển đến bàn học. Khi lỗi, không khẳng định toàn bộ các bước đã được hoàn tác.",
+      "trigger": "Khách chọn Đăng ký tài khoản.",
+      "main": [
+        "Khách mở biểu mẫu đăng ký.",
+        "Khách nhập họ tên, email, số điện thoại tùy chọn, mật khẩu và xác nhận; đồng ý điều khoản trên giao diện.",
+        "Giao diện kiểm tra trường bắt buộc, email, mật khẩu tối thiểu 8 ký tự và xác nhận trùng khớp; gửi yêu cầu đăng ký.",
+        "Hệ thống chuẩn hóa email, kiểm tra dữ liệu và chỉ chấp nhận vai trò học viên; mật khẩu được băm trước khi lưu.",
+        "Hệ thống tạo tài khoản, ghi thông báo chào mừng và tạo phiên xác thực.",
+        "Giao diện lưu thông tin phiên, thông báo thành công và chuyển đến bàn học học viên."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Thiếu dữ liệu, email sai, mật khẩu ngắn hoặc xác nhận khác nhau: thông báo lỗi để khách sửa; chưa gửi hoặc chưa chấp nhận yêu cầu."
+        ],
+        [
+          "4a",
+          "Email đã tồn tại: từ chối tạo trùng và yêu cầu dùng email khác hoặc đăng nhập."
+        ],
+        [
+          "4b",
+          "Yêu cầu tự đăng ký quyền giáo viên/admin: từ chối; quyền này do admin cấp."
+        ],
+        [
+          "5a",
+          "Lỗi ở bước thông báo hoặc tạo phiên: trả lỗi; cần kiểm tra tài khoản có thể đã được tạo trước đó trước khi thử lại."
+        ]
+      ],
+      "issues": [
+        "Chưa tích hợp xác minh email/OTP. Việc đồng ý điều khoản mới được kiểm tra tại giao diện, chưa lưu thành hồ sơ chấp thuận riêng."
+      ],
+      "endpoints": [
+        "POST /api/auth/register"
+      ],
+      "tables": [
+        "users",
+        "notifications",
+        "sessions"
+      ]
+    },
+    {
+      "id": "UC02",
+      "n": 2,
+      "name": "Đăng nhập",
+      "actors": [
+        "KH"
+      ],
+      "summary": "Người chưa xác thực dùng tài khoản đã có để truy cập chức năng theo vai trò.",
+      "pre": "Có tài khoản và mật khẩu; chưa có phiên đăng nhập hợp lệ trên giao diện đang dùng. Khách ở đây có thể là người sở hữu tài khoản học viên, giáo viên hoặc admin.",
+      "post": "Thành công: có phiên xác thực còn hạn; người dùng được chuyển đến trang phù hợp vai trò hoặc đường dẫn được phép đã yêu cầu. Thất bại: không cấp phiên mới.",
+      "trigger": "Người dùng chọn Đăng nhập.",
+      "main": [
+        "Người dùng mở trang Đăng nhập.",
+        "Người dùng nhập email và mật khẩu rồi gửi biểu mẫu.",
+        "Hệ thống tìm tài khoản theo email và kiểm tra mật khẩu đã băm.",
+        "Hệ thống kiểm tra tài khoản đang hoạt động.",
+        "Hệ thống tạo token phiên ngẫu nhiên, chỉ lưu hash token và hạn sử dụng trong database.",
+        "Giao diện lưu phiên, lấy vai trò và điều hướng người dùng đến chức năng được cấp quyền."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Email hoặc mật khẩu không đúng: trả thông báo đăng nhập thất bại, không tiết lộ riêng email có tồn tại hay không."
+        ],
+        [
+          "4a",
+          "Tài khoản bị khóa: từ chối truy cập và thông báo trạng thái tài khoản."
+        ],
+        [
+          "2a",
+          "Vượt giới hạn yêu cầu của nhóm API xác thực: yêu cầu chờ và thử lại."
+        ],
+        [
+          "6a",
+          "Phiên không hợp lệ khi tải lại trang: xóa thông tin đăng nhập cục bộ và chuyển về trang Đăng nhập."
+        ]
+      ],
+      "issues": [
+        "Ô “Ghi nhớ đăng nhập” chưa làm thay đổi cơ chế lưu hoặc thời hạn phiên; không có quy trình email khôi phục mật khẩu tự phục vụ."
+      ],
+      "endpoints": [
+        "POST /api/auth/login",
+        "GET /api/auth/profile"
+      ],
+      "tables": [
+        "users",
+        "sessions"
+      ]
+    },
+    {
+      "id": "UC03",
+      "n": 3,
+      "name": "Đăng xuất",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "summary": "Người dùng kết thúc phiên đăng nhập hiện tại trên thiết bị đang sử dụng.",
+      "pre": "Người dùng đã đăng nhập hoặc giao diện đang giữ thông tin phiên trước đó.",
+      "post": "Giao diện xóa token và thông tin người dùng cục bộ. Nếu yêu cầu đến server thành công, phiên hiện tại bị thu hồi; các phiên ở thiết bị khác không bị đăng xuất bởi thao tác này.",
+      "trigger": "Người dùng chọn Đăng xuất.",
+      "main": [
+        "Người dùng chọn chức năng Đăng xuất.",
+        "Giao diện gửi yêu cầu thu hồi phiên hiện tại đến hệ thống.",
+        "Giao diện xóa token, thông tin tài khoản cục bộ ngay, không chờ phản hồi server, và chuyển về trạng thái chưa đăng nhập.",
+        "Khi nhận yêu cầu hợp lệ, server thu hồi phiên tương ứng; việc hoàn tất phía server không phải điều kiện để giao diện đăng xuất cục bộ."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Phiên đã hết hạn hoặc không tồn tại: server từ chối xác thực; giao diện vẫn xóa thông tin cục bộ."
+        ],
+        [
+          "2a",
+          "Không liên lạc được server: giao diện vẫn đăng xuất cục bộ; không bảo đảm token phía server đã bị thu hồi ngay."
+        ]
+      ],
+      "issues": [
+        "Khi mất mạng, phiên phía server có thể còn hiệu lực đến khi hết hạn; không mô tả đây là “đăng xuất mọi thiết bị”."
+      ],
+      "endpoints": [
+        "POST /api/auth/logout"
+      ],
+      "tables": [
+        "sessions"
+      ]
+    },
+    {
+      "id": "UC04",
+      "n": 4,
+      "name": "Quản lý hồ sơ cá nhân",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "summary": "Người dùng xem và cập nhật thông tin hồ sơ của chính mình.",
+      "pre": "Đã đăng nhập bằng tài khoản đang hoạt động.",
+      "post": "Thành công: họ tên, điện thoại và URL ảnh đại diện được cập nhật; email và vai trò không thay đổi qua chức năng hồ sơ cá nhân.",
+      "trigger": "Người dùng mở trang Hồ sơ cá nhân.",
+      "main": [
+        "Người dùng mở hồ sơ; giao diện hiển thị thông tin tài khoản hiện tại.",
+        "Người dùng sửa họ tên, số điện thoại hoặc đường dẫn ảnh đại diện.",
+        "Người dùng chọn lưu; giao diện gửi yêu cầu cập nhật hồ sơ của phiên hiện tại.",
+        "Hệ thống kiểm tra họ tên và định dạng URL được phép, cập nhật các trường cho phép.",
+        "Hệ thống trả hồ sơ đã cập nhật; giao diện làm mới thông tin và thông báo thành công."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Họ tên không hợp lệ hoặc URL không dùng http/https: yêu cầu sửa dữ liệu, không chấp nhận cập nhật đó."
+        ],
+        [
+          "3a",
+          "Phiên hết hạn hoặc tài khoản đã bị khóa: yêu cầu đăng nhập lại hoặc từ chối truy cập."
+        ],
+        [
+          "4b",
+          "Client gửi kèm email/vai trò: các trường này không được cập nhật qua API hồ sơ cá nhân."
+        ]
+      ],
+      "issues": [
+        "Ảnh đại diện được khai báo bằng URL; chưa có chức năng tải tệp ảnh lên hệ thống."
+      ],
+      "endpoints": [
+        "GET /api/auth/profile",
+        "PUT /api/auth/profile"
+      ],
+      "tables": [
+        "users"
+      ]
+    },
+    {
+      "id": "UC05",
+      "n": 5,
+      "name": "Đổi mật khẩu",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "summary": "Người dùng thay đổi mật khẩu của mình và thu hồi các phiên đăng nhập khác.",
+      "pre": "Đã đăng nhập; biết mật khẩu hiện tại.",
+      "post": "Thành công: lưu hash mật khẩu mới, thu hồi các phiên khác và giữ phiên hiện tại. Hai thao tác ghi này nằm trong cùng giao dịch.",
+      "trigger": "Người dùng chọn Đổi mật khẩu trong trang Hồ sơ.",
+      "main": [
+        "Người dùng mở phần đổi mật khẩu.",
+        "Người dùng nhập mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới.",
+        "Giao diện kiểm tra xác nhận; hệ thống kiểm tra mật khẩu hiện tại và mật khẩu mới tối thiểu 8 ký tự.",
+        "Hệ thống băm mật khẩu mới và cập nhật tài khoản trong giao dịch.",
+        "Hệ thống xóa các phiên khác của tài khoản, hoàn tất giao dịch và thông báo thành công."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Mật khẩu hiện tại không đúng: từ chối thay đổi."
+        ],
+        [
+          "3b",
+          "Mật khẩu mới không hợp lệ hoặc xác nhận không khớp: yêu cầu nhập lại."
+        ],
+        [
+          "4a",
+          "Không lưu được giao dịch: hoàn tác cập nhật trong giao dịch và thông báo lỗi."
+        ]
+      ],
+      "issues": [
+        "Chức năng này cần mật khẩu hiện tại; quên mật khẩu được xử lý bằng admin đặt lại, chưa có email khôi phục tự động."
+      ],
+      "endpoints": [
+        "PUT /api/auth/change-password"
+      ],
+      "tables": [
+        "users",
+        "sessions"
+      ]
+    },
+    {
+      "id": "UC06",
+      "n": 6,
+      "name": "Tra cứu khóa học",
+      "actors": [
+        "KH",
+        "HV"
+      ],
+      "summary": "Khách hoặc học viên tìm khóa học đã xuất bản theo thông tin và bộ lọc được cung cấp.",
+      "pre": "Truy cập được trang danh mục; xem chi tiết khóa ở giao diện học viên cần đăng nhập.",
+      "post": "Hiển thị danh sách phù hợp và thông tin được phép xem; chưa phát sinh ghi danh hoặc mở quyền học nội dung.",
+      "trigger": "Khách mở trang chủ hoặc học viên mở Khám phá khóa học.",
+      "main": [
+        "Người dùng mở trang danh mục; hệ thống tải khóa học đã xuất bản.",
+        "Người dùng nhập từ khóa hoặc chọn bộ lọc được trang hỗ trợ; học viên có thể lọc thêm chương trình và trình độ.",
+        "Hệ thống/giao diện áp dụng bộ lọc, hiển thị các khóa phù hợp cùng giáo viên, học phí và số bài học.",
+        "Người dùng chọn một khóa để xem chi tiết.",
+        "Nếu đã đăng nhập, hệ thống hiển thị mô tả, danh sách bài học dạng giới thiệu và trạng thái ghi danh; nội dung học vẫn được kiểm tra quyền riêng."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Không có khóa phù hợp: hiển thị trạng thái không có kết quả; người dùng đổi bộ lọc."
+        ],
+        [
+          "4a",
+          "Khách chọn chi tiết khóa: chuyển đến đăng nhập trước khi vào trang chi tiết được bảo vệ."
+        ],
+        [
+          "5a",
+          "Khóa không tồn tại hoặc chưa xuất bản đối với người học: thông báo không thể truy cập."
+        ]
+      ],
+      "issues": [
+        "Một số trang chỉ tải một trang dữ liệu API; không khẳng định giao diện đã hiển thị toàn bộ khóa khi số lượng vượt giới hạn tải."
+      ],
+      "endpoints": [
+        "GET /api/catalog",
+        "GET /api/courses",
+        "GET /api/programs",
+        "GET /api/courses/:id",
+        "GET /api/lessons/course/:courseId"
+      ],
+      "tables": [
+        "courses",
+        "users",
+        "programs",
+        "lessons",
+        "enrollments"
+      ]
+    },
+    {
+      "id": "UC07",
+      "n": 7,
+      "name": "Đăng ký khóa học",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên ghi danh một khóa đã xuất bản; khóa miễn phí được mở học, khóa có phí chờ giáo viên/admin duyệt.",
+      "pre": "Học viên đã đăng nhập; khóa đã xuất bản; chưa có ghi danh còn hiệu lực hoặc ghi danh trước đã ở trạng thái dropped.",
+      "post": "Thành công: tạo hoặc cập nhật ghi danh; miễn phí thành active, có phí thành pending; tạo thông báo liên quan. Không tạo giao dịch thanh toán trực tuyến.",
+      "trigger": "Học viên chọn Đăng ký tại trang chi tiết khóa học.",
+      "main": [
+        "Học viên mở chi tiết khóa và xem thông tin học phí, nội dung giới thiệu.",
+        "Học viên chọn đăng ký khóa học.",
+        "Hệ thống kiểm tra quyền truy cập khóa và ghi danh đã có của chính học viên.",
+        "Hệ thống ghi danh active nếu miễn phí; nếu có phí, ghi pending để chờ duyệt.",
+        "Hệ thống tạo thông báo cho học viên; với khóa có phí, thông báo giáo viên phụ trách có yêu cầu cần duyệt.",
+        "Giao diện hiển thị quyền bắt đầu học hoặc trạng thái chờ duyệt tương ứng."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Đã có ghi danh khác dropped: từ chối tạo trùng; giao diện hiển thị trạng thái hiện tại."
+        ],
+        [
+          "3b",
+          "Ghi danh trước là dropped: tái sử dụng bản ghi và cập nhật về active/pending theo loại khóa."
+        ],
+        [
+          "4a",
+          "Khóa có phí: học viên chưa được mở nội dung cho đến khi được duyệt."
+        ],
+        [
+          "5a",
+          "Lỗi tạo thông báo: ghi danh có thể đã được lưu; cần tải lại trạng thái trước khi gửi lại yêu cầu."
+        ]
+      ],
+      "issues": [
+        "Hệ thống chưa có cổng thanh toán, hóa đơn hoặc kiểm chứng tự động việc đã thu tiền. Việc xác nhận phí được thực hiện thủ công ngoài luồng thanh toán của phần mềm."
+      ],
+      "endpoints": [
+        "GET /api/enrollments/check/:courseId",
+        "POST /api/enrollments"
+      ],
+      "tables": [
+        "courses",
+        "enrollments",
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC08",
+      "n": 8,
+      "name": "Duyệt đăng ký khóa học",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Giáo viên phụ trách hoặc admin duyệt học viên đang chờ vào khóa học.",
+      "pre": "Đã đăng nhập với quyền quản lý khóa; để duyệt một bản ghi, ghi danh đó phải đang pending trên giao diện.",
+      "post": "Thành công: ghi danh thành active, học viên có quyền học nội dung đã xuất bản và nhận thông báo cập nhật.",
+      "trigger": "Người quản lý chọn Duyệt đăng ký tại Tiến độ học viên.",
+      "main": [
+        "Người quản lý mở Tiến độ học viên, lọc khóa hoặc tìm tên/email học viên.",
+        "Giao diện hiển thị trạng thái và nút Duyệt đăng ký cho bản ghi pending.",
+        "Người quản lý chọn duyệt; giao diện gửi trạng thái active cho ghi danh.",
+        "Hệ thống kiểm tra giáo viên phụ trách khóa hoặc quyền admin, rồi cập nhật ghi danh.",
+        "Hệ thống ghi thông báo cho học viên; giao diện tải lại danh sách và báo cập nhật thành công."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Chưa có ghi danh chờ duyệt: không có nút duyệt ở dòng đang học/hoàn thành."
+        ],
+        [
+          "4a",
+          "Giáo viên không phụ trách khóa: từ chối thao tác."
+        ],
+        [
+          "4b",
+          "Ghi danh không tồn tại: trả lỗi và tải lại danh sách."
+        ],
+        [
+          "5a",
+          "Không tạo được thông báo sau cập nhật: cần kiểm tra trạng thái đã lưu; không giả định duyệt đã bị hoàn tác."
+        ]
+      ],
+      "issues": [
+        "API còn nhận trạng thái dropped, nhưng trang hiện tại chưa có nút từ chối/hủy tương ứng. Nút duyệt không phải chứng từ thanh toán."
+      ],
+      "endpoints": [
+        "GET /api/enrollments",
+        "PUT /api/enrollments/:id"
+      ],
+      "tables": [
+        "enrollments",
+        "courses",
+        "users",
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC09",
+      "n": 9,
+      "name": "Học bài và ghi nhận tiến độ",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên xem nội dung bài học và chủ động đánh dấu đã học để ghi tiến độ, thời gian học.",
+      "pre": "Đã đăng nhập; ghi danh active/completed; khóa và bài học đã xuất bản.",
+      "post": "Khi lưu thành công: tiến độ bài và phiên học được ghi; hoàn thành được giữ; ghi danh có thể chuyển completed nếu đã hoàn thành mọi bài được xuất bản.",
+      "trigger": "Học viên chọn một bài trong khóa được phép học.",
+      "main": [
+        "Học viên mở bài học; hệ thống kiểm tra ghi danh và trạng thái xuất bản.",
+        "Hệ thống trả nội dung, media URL nếu có, danh sách bài tập và bài trước/sau trong cùng khóa.",
+        "Học viên đọc nội dung, xem/nghe media được giáo viên cung cấp hoặc chuyển bài.",
+        "Học viên chọn Đánh dấu đã học; giao diện gửi mã phiên học UUID và số giây lũy kế từ lúc mở bài.",
+        "Hệ thống gọi thủ tục ghi tiến độ SQL Server, kiểm tra phiên và chỉ cộng phần thời gian tăng thêm của cùng phiên.",
+        "Hệ thống cập nhật hoàn thành bài/khóa khi đủ điều kiện; giao diện hiển thị đã hoàn thành."
+      ],
+      "extensions": [
+        [
+          "1a",
+          "Ghi danh chưa được duyệt, bài bị ẩn hoặc không tồn tại: từ chối mở nội dung."
+        ],
+        [
+          "3a",
+          "Không có media URL hoặc media ngoài không phát được: vẫn có thể đọc nội dung; hệ thống không tự sinh tệp âm thanh/video."
+        ],
+        [
+          "5a",
+          "Gửi lại cùng mã phiên với số giây không tăng: không cộng trùng thời gian."
+        ],
+        [
+          "5b",
+          "Mã phiên thuộc học viên/bài khác hoặc thời gian ngoài giới hạn: từ chối lưu."
+        ]
+      ],
+      "issues": [
+        "Thời gian chỉ được gửi khi bấm hoàn thành, không có theo dõi liên tục/video heartbeat. Thứ tự bài là gợi ý điều hướng, không khóa bài sau theo điều kiện hoàn thành bài trước."
+      ],
+      "endpoints": [
+        "GET /api/lessons/:id",
+        "GET /api/progress",
+        "GET /api/exercises/lesson/:id",
+        "POST /api/progress"
+      ],
+      "tables": [
+        "lessons",
+        "courses",
+        "enrollments",
+        "progress",
+        "study_sessions"
+      ]
+    },
+    {
+      "id": "UC10",
+      "n": 10,
+      "name": "Làm bài tập",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên trả lời bài tập, nộp bài và nhận điểm tự động hoặc trạng thái chờ chấm cho phần viết/nói.",
+      "pre": "Đã đăng nhập; được học bài chứa bài tập; bài tập đã xuất bản và có câu hỏi.",
+      "post": "Thành công: lưu lượt làm bài, snapshot câu hỏi, câu trả lời và kết quả; bài khách quan thành graded, có viết/nói thành pending_grading và có thông báo.",
+      "trigger": "Học viên chọn Làm bài tập từ bài học.",
+      "main": [
+        "Học viên mở bài tập; hệ thống trả câu hỏi và lựa chọn đã loại thông tin đáp án đúng/lời giải.",
+        "Học viên chọn đáp án hoặc nhập câu trả lời văn bản; phần nói dùng liên kết bản ghi âm hoặc bản chép lời.",
+        "Học viên chọn Nộp bài và xác nhận nếu giao diện phát hiện còn câu chưa trả lời.",
+        "Hệ thống kiểm tra câu trả lời thuộc bài, tạo lượt làm với snapshot câu hỏi và đáp án tại thời điểm nộp.",
+        "Hệ thống chấm câu khách quan theo đáp án; viết/nói được đánh dấu cần giáo viên chấm; lưu kết quả và thông báo trong giao dịch.",
+        "Giao diện hiển thị điểm, lời giải hoặc thông báo đang chờ chấm; học viên có thể xem lại trong lịch sử."
+      ],
+      "extensions": [
+        [
+          "1a",
+          "Không đủ quyền, bài chưa xuất bản hoặc chưa có câu hỏi: không mở được bài làm hợp lệ."
+        ],
+        [
+          "3a",
+          "Học viên hủy xác nhận nộp thiếu câu: quay lại làm bài."
+        ],
+        [
+          "4a",
+          "Câu hỏi/phương án không thuộc snapshot hoặc dữ liệu sai: từ chối nộp."
+        ],
+        [
+          "5a",
+          "Có câu viết/nói: điểm khách quan chỉ là tạm tính, chưa xác nhận kết quả cuối cùng."
+        ],
+        [
+          "5b",
+          "Lỗi giao dịch lưu bài: hoàn tác phần ghi trong giao dịch và báo lỗi."
+        ]
+      ],
+      "issues": [
+        "Bài tập không có đồng hồ cưỡng chế hoặc lưu nháp như bài thi. Nối/sắp xếp dùng trả lời bằng văn bản; chưa có kéo-thả, ghi âm trực tiếp hoặc AI chấm nói."
+      ],
+      "endpoints": [
+        "GET /api/exercises/:id",
+        "GET /api/questions/exercise/:id",
+        "POST /api/exercises/:id/submit"
+      ],
+      "tables": [
+        "exercises",
+        "questions",
+        "answers",
+        "attempts",
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC11",
+      "n": 11,
+      "name": "Làm bài kiểm tra/thi thử",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên thực hiện bài kiểm tra có giới hạn lượt, hạn nộp theo server và khả năng lưu nháp/tiếp tục.",
+      "pre": "Tài khoản có vai trò học viên và đang hoạt động; được ghi danh vào khóa; đề đã xuất bản, có câu hỏi và còn lượt hoặc có lượt đang làm để tiếp tục.",
+      "post": "Thành công: lưu hoặc tiếp tục một lượt thi hợp lệ; khi nộp, lưu kết quả graded/pending_grading theo loại câu hỏi. Nộp lại cùng lượt không tạo bài mới.",
+      "trigger": "Học viên mở một bài kiểm tra từ bàn học.",
+      "main": [
+        "Học viên mở đề; hệ thống kiểm tra quyền, trạng thái xuất bản và thông tin đề.",
+        "Hệ thống tiếp tục lượt in_progress còn phù hợp; nếu tạo lượt mới, kiểm tra số lượt rồi lưu snapshot và deadline theo server.",
+        "Giao diện khôi phục câu trả lời đã lưu và hiển thị đồng hồ; học viên bắt đầu trả lời.",
+        "Sau thay đổi đáp án, giao diện gửi lưu nháp; hệ thống chỉ nhận khi lượt còn in_progress và chưa quá hạn.",
+        "Học viên nộp bài hoặc giao diện tự gửi nộp khi đồng hồ về 0.",
+        "Hệ thống kiểm tra chủ lượt, đúng đề, trạng thái và hạn nộp; chấm snapshot, lưu kết quả và thông báo trong giao dịch.",
+        "Giao diện hiển thị kết quả; chi tiết đáp án/lời giải chỉ được trả khi đề cho phép xem."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Đã hết lượt hoặc đề không có câu hỏi: từ chối bắt đầu lượt mới."
+        ],
+        [
+          "3a",
+          "Tải lại trang khi lượt còn hiệu lực: tiếp tục đúng lượt, đáp án đã lưu và deadline cũ."
+        ],
+        [
+          "4a",
+          "Lượt quá hạn: từ chối lưu nháp mới; phần xử lý API xác thực có thể đã kết thúc lượt bằng đáp án đã lưu."
+        ],
+        [
+          "5a",
+          "Học viên hủy xác nhận nộp thiếu câu: tiếp tục làm nếu còn thời gian."
+        ],
+        [
+          "6a",
+          "Lượt không thuộc học viên hoặc không đúng đề: từ chối; không dùng câu trả lời gửi cho đề khác."
+        ],
+        [
+          "6b",
+          "Lượt đã nộp: trả kết quả cũ; không tính thành một lượt mới. Với lượt quá hạn, không chấp nhận tùy ý đáp án đến muộn."
+        ]
+      ],
+      "issues": [
+        "Khi không có request, không có daemon nền tự chấm đúng thời điểm deadline; request xác thực tiếp theo sẽ xử lý lượt quá hạn. Không có giám sát thi, lịch mở/đóng kỳ thi hoặc quy đổi band IELTS."
+      ],
+      "endpoints": [
+        "GET /api/exams/:id",
+        "POST /api/exams/:id/start",
+        "PUT /api/exams/:id/draft",
+        "POST /api/exams/:id/submit"
+      ],
+      "tables": [
+        "exams",
+        "exam_questions",
+        "questions",
+        "answers",
+        "attempts",
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC12",
+      "n": 12,
+      "name": "Xem kết quả và lời giải",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên xem bài đã nộp, điểm, câu trả lời, lời giải được phép và nhận xét giáo viên.",
+      "pre": "Đã đăng nhập; khi mở chi tiết, lượt làm phải đã nộp và thuộc chính tài khoản.",
+      "post": "Hiển thị kết quả được phép xem; không thay đổi bài làm hay điểm.",
+      "trigger": "Học viên chọn Xem kết quả ở lịch sử bài tập hoặc Tiến độ & Kết quả.",
+      "main": [
+        "Học viên mở lịch sử bài làm hoặc trang tiến độ.",
+        "Hệ thống tải danh sách bài đã nộp của tài khoản, kèm điểm và trạng thái.",
+        "Học viên chọn một bài để xem chi tiết.",
+        "Hệ thống kiểm tra chủ bài và loại bài; với bài thi, kiểm tra quyền xem lời giải của đề.",
+        "Giao diện hiển thị điểm, câu trả lời và lời giải nếu được phép; hiển thị chờ chấm hoặc nhận xét khi có."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Chưa có bài nộp: hiển thị chưa có lịch sử."
+        ],
+        [
+          "4a",
+          "Yêu cầu xem bài người khác hoặc nhầm loại bài: từ chối truy cập."
+        ],
+        [
+          "4b",
+          "Đề không cho xem đáp án sau thi: chỉ trả các trường kết quả được phép, không trả chi tiết lời giải."
+        ],
+        [
+          "5a",
+          "Bài đang pending_grading: hiển thị chờ giáo viên; điểm có thể là tạm tính hoặc chưa có đối với dữ liệu mẫu."
+        ]
+      ],
+      "issues": [
+        "Lời giải bài đã nộp lấy từ snapshot; sửa đáp án ngân hàng sau đó không tự sửa lịch sử. Chi tiết chấm từng câu có thể chưa đồng bộ khi giáo viên chỉ sửa điểm tổng."
+      ],
+      "endpoints": [
+        "GET /api/exercises/my-attempts",
+        "GET /api/exercises/my-attempts/:id",
+        "GET /api/exams/results/:id",
+        "GET /api/dashboard/student"
+      ],
+      "tables": [
+        "attempts",
+        "exams"
+      ]
+    },
+    {
+      "id": "UC13",
+      "n": 13,
+      "name": "Theo dõi tiến độ học tập",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên theo dõi số bài hoàn thành, tiến độ khóa, lịch sử bài làm, điểm và thời gian học được ghi nhận.",
+      "pre": "Đã đăng nhập; không bắt buộc đã có bài học hoặc bài làm để mở trang.",
+      "post": "Hiển thị thống kê của tài khoản theo dữ liệu hiện có; không tạo báo cáo định kỳ mới từ màn hình này.",
+      "trigger": "Học viên mở Tiến độ & Kết quả hoặc bàn học.",
+      "main": [
+        "Học viên mở trang theo dõi tiến độ.",
+        "Hệ thống đọc ghi danh, các bài đã hoàn thành và lượt làm đã nộp của học viên.",
+        "Hệ thống tính phần trăm theo số bài học đã xuất bản và điểm trung bình từ các bài graded.",
+        "Hệ thống tổng hợp thời gian học ghi nhận theo 7 ngày UTC gần nhất.",
+        "Giao diện hiển thị các khóa, thanh tiến độ, biểu đồ thời gian và lịch sử; học viên có thể chuyển đến kết quả chi tiết."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Chưa có dữ liệu: hiển thị 0 hoặc trạng thái chưa có, không tự tạo điểm giả."
+        ],
+        [
+          "3a",
+          "Bài còn chờ chấm: không đưa vào điểm trung bình cuối cùng của các bài graded."
+        ],
+        [
+          "4a",
+          "Không có phiên học được lưu trong ngày: thời gian ghi nhận của ngày là 0, không suy ra thời gian mở trình duyệt thực tế."
+        ]
+      ],
+      "issues": [
+        "Database và API có thể đọc báo cáo tuần/tháng đã lưu, nhưng hiện chưa có trang báo cáo định kỳ riêng hoặc lịch tự tạo báo cáo trong ứng dụng."
+      ],
+      "endpoints": [
+        "GET /api/dashboard/student"
+      ],
+      "tables": [
+        "enrollments",
+        "lessons",
+        "progress",
+        "attempts",
+        "study_sessions"
+      ]
+    },
+    {
+      "id": "UC14",
+      "n": 14,
+      "name": "Xem lộ trình học tập",
+      "actors": [
+        "HV"
+      ],
+      "summary": "Học viên xem các khóa được giáo viên sắp theo thứ tự và tiến độ tham gia từng khóa.",
+      "pre": "Đã đăng nhập; có thể có hoặc chưa có ghi danh vào các khóa trong lộ trình.",
+      "post": "Hiển thị lộ trình được xuất bản và liên kết đến khóa; không tự ghi danh hàng loạt hoặc tạo lộ trình cá nhân.",
+      "trigger": "Học viên chọn Lộ trình học tập.",
+      "main": [
+        "Học viên mở trang lộ trình.",
+        "Hệ thống tải các lộ trình đã xuất bản cùng các khóa được phép hiển thị và ghi danh của học viên.",
+        "Học viên chọn một lộ trình.",
+        "Giao diện hiển thị mô tả, trình độ, số ngày dự kiến, thứ tự khóa và tiến độ tương ứng.",
+        "Học viên chọn Xem khóa học để mở chi tiết; đăng ký từng khóa được xử lý bằng chức năng ghi danh riêng."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Chưa có lộ trình xuất bản: hiển thị chưa có lộ trình."
+        ],
+        [
+          "4a",
+          "Một khóa chưa được ghi danh: hiển thị chưa tham gia; không tự mở quyền học."
+        ],
+        [
+          "4b",
+          "Không còn khóa được phép hiển thị: thông báo lộ trình đang được bổ sung nội dung."
+        ]
+      ],
+      "issues": [
+        "Thứ tự là hướng dẫn học, chưa cưỡng chế điều kiện tiên quyết hoặc cá nhân hóa bằng AI."
+      ],
+      "endpoints": [
+        "GET /api/learning-paths",
+        "GET /api/enrollments"
+      ],
+      "tables": [
+        "learning_paths",
+        "path_courses",
+        "courses",
+        "enrollments",
+        "progress"
+      ]
+    },
+    {
+      "id": "UC15",
+      "n": 15,
+      "name": "Xem và đánh dấu thông báo",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "summary": "Người dùng đọc thông báo nội bộ dành cho mình và đánh dấu đã đọc.",
+      "pre": "Đã đăng nhập bằng tài khoản đang hoạt động.",
+      "post": "Hiển thị thông báo của tài khoản; khi thao tác thành công, cập nhật cờ đã đọc của một hoặc toàn bộ thông báo của chính tài khoản.",
+      "trigger": "Người dùng mở biểu tượng thông báo hoặc trang Thông báo.",
+      "main": [
+        "Người dùng mở danh sách thông báo.",
+        "Hệ thống lấy thông báo thuộc tài khoản và hiển thị trạng thái đọc.",
+        "Người dùng chọn bộ lọc hoặc mở một thông báo.",
+        "Người dùng chọn đánh dấu đã đọc cho một thông báo hoặc tất cả.",
+        "Hệ thống kiểm tra quyền sở hữu, cập nhật trạng thái và giao diện làm mới danh sách."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Không có thông báo phù hợp: hiển thị danh sách rỗng."
+        ],
+        [
+          "5a",
+          "Thông báo thuộc người khác: từ chối cập nhật."
+        ],
+        [
+          "5b",
+          "Lỗi cập nhật: thông báo lỗi; không tự coi mọi thông báo đã được đánh dấu."
+        ]
+      ],
+      "issues": [
+        "Thông báo không dùng WebSocket/push/email; cần tải lại để nhận dữ liệu mới. Bộ đếm ở header chỉ dựa trên nhóm thông báo đã tải tại đó."
+      ],
+      "endpoints": [
+        "GET /api/notifications",
+        "PUT /api/notifications/:id/read",
+        "PUT /api/notifications/read-all"
+      ],
+      "tables": [
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC16",
+      "n": 16,
+      "name": "Quản lý khóa học",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý tạo, xem, sửa, ẩn/xuất bản hoặc xóa khóa học trong phạm vi được cấp.",
+      "pre": "Đã đăng nhập với vai trò giáo viên hoặc admin; thao tác với khóa có sẵn cần quyền quản lý khóa đó.",
+      "post": "Thành công: khóa được tạo/cập nhật/xóa theo thao tác; dữ liệu có lịch sử làm bài được bảo vệ khi xóa.",
+      "trigger": "Người quản lý mở Quản lý khóa học.",
+      "main": [
+        "Hệ thống hiển thị danh sách khóa trong phạm vi quản lý và bộ lọc.",
+        "Người quản lý chọn thêm mới, sửa, đổi xuất bản hoặc xóa một khóa.",
+        "Với thêm/sửa, nhập tiêu đề, chương trình tùy chọn, mô tả, ảnh URL, trình độ, miễn phí/học phí và trạng thái xuất bản.",
+        "Hệ thống kiểm tra dữ liệu, slug duy nhất và quyền sở hữu; khóa miễn phí được đặt giá 0.",
+        "Hệ thống lưu; nếu xóa thì kiểm tra bài làm liên quan trước khi xử lý các bản ghi con trong giao dịch.",
+        "Giao diện tải lại danh sách và hiển thị kết quả thao tác."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Người quản lý hủy xác nhận xóa: không gửi yêu cầu xóa."
+        ],
+        [
+          "4a",
+          "Dữ liệu sai, slug trùng hoặc không đúng quyền: từ chối lưu."
+        ],
+        [
+          "5a",
+          "Khóa đã có bài làm: từ chối xóa để bảo toàn lịch sử; có thể ẩn bằng trạng thái xuất bản."
+        ],
+        [
+          "5b",
+          "Lỗi xử lý xóa trong giao dịch: hoàn tác các bước xóa thuộc giao dịch."
+        ]
+      ],
+      "issues": [
+        "Giao diện hiện chưa có chọn/chuyển giáo viên phụ trách sau khi tạo. Không có doanh thu/hóa đơn được phát sinh tự động từ giá khóa."
+      ],
+      "endpoints": [
+        "GET /api/courses",
+        "POST /api/courses",
+        "PUT /api/courses/:id",
+        "DELETE /api/courses/:id"
+      ],
+      "tables": [
+        "courses",
+        "programs",
+        "users",
+        "lessons",
+        "enrollments",
+        "attempts",
+        "path_courses"
+      ]
+    },
+    {
+      "id": "UC17",
+      "n": 17,
+      "name": "Quản lý bài học",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý soạn, cập nhật, sắp xếp, xuất bản hoặc xóa bài học trong một khóa được phép quản lý.",
+      "pre": "Đã đăng nhập với quyền quản lý khóa; khóa đã tồn tại.",
+      "post": "Thành công: dữ liệu bài học hoặc thứ tự hiển thị được cập nhật; xóa chỉ thực hiện khi thỏa điều kiện bảo vệ lịch sử.",
+      "trigger": "Người quản lý mở Quản lý bài học và chọn khóa.",
+      "main": [
+        "Người quản lý chọn khóa; hệ thống tải bài học theo thứ tự.",
+        "Người quản lý chọn thêm/sửa bài, thay đổi xuất bản, chuyển lên/xuống hoặc xóa.",
+        "Với thêm/sửa, nhập tiêu đề, nội dung, URL video/audio nếu có, thời lượng, thứ tự và trạng thái xuất bản.",
+        "Hệ thống kiểm tra quyền khóa, dữ liệu và URL được phép rồi lưu bài học.",
+        "Với xóa, hệ thống kiểm tra bài làm của các bài tập con và xử lý bản ghi liên quan nếu được phép.",
+        "Giao diện hiển thị danh sách được cập nhật hoặc tải lại khi thao tác sắp xếp gặp lỗi."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Bài thuộc khóa khác, URL/dữ liệu không hợp lệ: từ chối cập nhật."
+        ],
+        [
+          "2a",
+          "Đổi thứ tự: giao diện gửi hai yêu cầu cập nhật bài; nếu một yêu cầu lỗi, tải lại để phản ánh trạng thái đã lưu."
+        ],
+        [
+          "5a",
+          "Có bài làm liên quan: không cho xóa, có thể ẩn bài."
+        ],
+        [
+          "2b",
+          "Hủy hộp thoại xóa: kết thúc thao tác mà không xóa."
+        ]
+      ],
+      "issues": [
+        "Chưa có upload media và việc đổi chỗ hai bài chưa là một giao dịch liên yêu cầu. document_url có ở schema nhưng chưa có ô nhập/hiển thị tài liệu đầy đủ trong giao diện hiện tại."
+      ],
+      "endpoints": [
+        "GET /api/lessons/course/:courseId",
+        "POST /api/lessons",
+        "PUT /api/lessons/:id",
+        "DELETE /api/lessons/:id"
+      ],
+      "tables": [
+        "lessons",
+        "courses",
+        "exercises",
+        "questions",
+        "progress",
+        "study_sessions",
+        "attempts"
+      ]
+    },
+    {
+      "id": "UC18",
+      "n": 18,
+      "name": "Quản lý bài tập",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý tạo, sửa, xuất bản hoặc xóa bộ bài tập gắn với một bài học.",
+      "pre": "Đã đăng nhập; có quyền quản lý khóa chứa bài học.",
+      "post": "Thành công: bộ bài tập được lưu hoặc xóa khi đủ điều kiện. Nội dung câu hỏi được soạn qua chức năng quản lý câu hỏi riêng.",
+      "trigger": "Người quản lý mở Quản lý bài tập rồi chọn khóa và bài học.",
+      "main": [
+        "Người quản lý chọn bài học; hệ thống tải các bộ bài tập liên quan.",
+        "Người quản lý chọn thêm bộ bài, sửa, đổi xuất bản hoặc xóa.",
+        "Với thêm/sửa, nhập tiêu đề, mô tả, loại, độ khó, thời lượng mô tả và trạng thái xuất bản.",
+        "Hệ thống kiểm tra quyền và giá trị cho phép, lưu bộ bài tập đúng bài học.",
+        "Với xóa, hệ thống kiểm tra lượt làm; nếu được phép thì xử lý câu hỏi, phương án và liên kết đề liên quan.",
+        "Giao diện tải lại danh sách; người quản lý có thể mở chức năng soạn câu hỏi cho bộ bài."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Không có quyền, bài học không tồn tại hoặc dữ liệu sai: từ chối lưu."
+        ],
+        [
+          "5a",
+          "Bộ bài đã có lượt làm: từ chối xóa, hướng tới ẩn nội dung để giữ lịch sử."
+        ],
+        [
+          "2a",
+          "Người dùng hủy xác nhận xóa: không thay đổi dữ liệu."
+        ]
+      ],
+      "issues": [
+        "Một số bài mẫu có type=mixed nhưng dropdown/nhãn chưa đầy đủ. time_limit của bài tập không được dùng như deadline cưỡng chế trong luồng làm bài tập."
+      ],
+      "endpoints": [
+        "GET /api/exercises",
+        "POST /api/exercises",
+        "PUT /api/exercises/:id",
+        "DELETE /api/exercises/:id"
+      ],
+      "tables": [
+        "exercises",
+        "lessons",
+        "courses",
+        "questions",
+        "answers",
+        "exam_questions",
+        "attempts"
+      ]
+    },
+    {
+      "id": "UC19",
+      "n": 19,
+      "name": "Quản lý câu hỏi và đáp án",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý soạn câu hỏi, phương án đúng, đáp án văn bản mẫu, điểm và lời giải cho một bộ bài tập.",
+      "pre": "Đã đăng nhập; bộ bài tập tồn tại trong khóa được phép quản lý.",
+      "post": "Thành công: câu hỏi/phương án được lưu nhất quán; sửa phương án không thay đổi snapshot của bài làm cũ.",
+      "trigger": "Người quản lý mở một bộ bài tập và chọn thêm/sửa/xóa câu hỏi.",
+      "main": [
+        "Hệ thống hiển thị câu hỏi hiện có và đáp án cho người có quyền soạn.",
+        "Người quản lý chọn dạng câu hỏi và nhập nội dung, điểm, lời giải.",
+        "Với trắc nghiệm/đúng-sai, nhập phương án và chọn một đáp án đúng; với điền/nối/sắp xếp, nhập đáp án mẫu; viết/nói không yêu cầu phương án chọn.",
+        "Hệ thống kiểm tra dạng câu hỏi, điểm; trắc nghiệm/đúng-sai cần 2–10 phương án và đúng một phương án đúng.",
+        "Hệ thống lưu câu hỏi và thay phương án trong cùng giao dịch; xóa câu hỏi sẽ gỡ phương án/liên kết đề liên quan.",
+        "Giao diện hiển thị bộ câu hỏi đã cập nhật."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Thiếu nội dung, điểm không trong giới hạn, đáp án trắc nghiệm sai số lượng hoặc thiếu đáp án mẫu: yêu cầu sửa."
+        ],
+        [
+          "5a",
+          "Không đủ quyền với khóa hoặc câu hỏi không tồn tại: từ chối."
+        ],
+        [
+          "5b",
+          "Lỗi giao dịch: hoàn tác các bước lưu câu hỏi/phương án thuộc giao dịch."
+        ]
+      ],
+      "issues": [
+        "Nối và sắp xếp là dạng văn bản, chưa có bộ soạn kéo-thả. Không có API /answers riêng đang được giao diện sử dụng; phương án đi kèm yêu cầu lưu câu hỏi."
+      ],
+      "endpoints": [
+        "GET /api/questions/exercise/:id",
+        "POST /api/questions",
+        "PUT /api/questions/:id",
+        "DELETE /api/questions/:id"
+      ],
+      "tables": [
+        "questions",
+        "answers",
+        "exercises",
+        "lessons",
+        "courses",
+        "exam_questions"
+      ]
+    },
+    {
+      "id": "UC20",
+      "n": 20,
+      "name": "Quản lý bài kiểm tra",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý tạo/cập nhật đề, chọn câu hỏi cùng khóa và thiết lập điều kiện làm bài.",
+      "pre": "Đã đăng nhập và có quyền quản lý khóa; khi chọn câu hỏi, câu hỏi phải tồn tại trong các bộ bài tập của khóa. Có thể lưu bản nháp chưa có câu hỏi.",
+      "post": "Thành công: metadata đề và danh sách câu hỏi có thứ tự được lưu cùng giao dịch; đề chỉ mở làm khi đủ điều kiện truy cập và có câu hỏi.",
+      "trigger": "Người quản lý mở Quản lý bài kiểm tra.",
+      "main": [
+        "Người quản lý chọn khóa và mở danh sách đề.",
+        "Người quản lý chọn thêm/sửa hoặc xóa đề; với thêm/sửa, nhập tiêu đề, mô tả, loại, thời lượng, điểm đạt và số lượt tối đa.",
+        "Với thêm/sửa, người quản lý chọn câu hỏi, thứ tự chọn, trộn câu, cho xem lời giải sau thi và xuất bản/bản nháp.",
+        "Hệ thống kiểm tra dữ liệu; danh sách tối đa 200 câu không trùng và mỗi câu phải thuộc cùng khóa của đề.",
+        "Hệ thống lưu đề và thay danh sách câu hỏi trong một giao dịch, hoặc xóa đề nếu chưa có lượt làm liên quan.",
+        "Giao diện tải lại danh sách và thông báo kết quả."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Đề xuất bản chưa chọn câu: giao diện yêu cầu chọn câu hỏi; đề không có câu cũng không thể bắt đầu thi."
+        ],
+        [
+          "4a",
+          "Câu thuộc khóa khác, ID lặp hoặc giá trị không hợp lệ: từ chối và không lưu dở các bước trong giao dịch."
+        ],
+        [
+          "5a",
+          "Đề đã có lượt làm: từ chối xóa để giữ lịch sử."
+        ],
+        [
+          "4b",
+          "Đề mẫu dùng type=mock: nếu không đổi về một loại hợp lệ, API cập nhật có thể từ chối vì validator dùng mock_test."
+        ]
+      ],
+      "issues": [
+        "Cần thống nhất mock/mock_test ở dữ liệu mẫu và form. Bộ chọn hiện chỉ tải tối đa 200 câu rồi lọc tại client; chưa có phân trang toàn bộ ngân hàng câu hỏi."
+      ],
+      "endpoints": [
+        "GET /api/exams",
+        "GET /api/questions",
+        "POST /api/exams",
+        "PUT /api/exams/:id",
+        "DELETE /api/exams/:id"
+      ],
+      "tables": [
+        "exams",
+        "exam_questions",
+        "questions",
+        "exercises",
+        "lessons",
+        "courses",
+        "attempts"
+      ]
+    },
+    {
+      "id": "UC21",
+      "n": 21,
+      "name": "Xem tiến độ học viên",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý theo dõi ghi danh, mức hoàn thành và điểm tổng hợp của học viên trong các khóa được cấp quyền.",
+      "pre": "Đã đăng nhập với quyền quản lý khóa; có thể chưa có ghi danh.",
+      "post": "Hiển thị dữ liệu tiến độ trong phạm vi được phép; bản thân việc xem không cập nhật điểm hoặc tiến độ học viên.",
+      "trigger": "Người quản lý mở Tiến độ học viên.",
+      "main": [
+        "Hệ thống tải danh sách khóa được quản lý và các ghi danh tương ứng.",
+        "Người quản lý lọc khóa hoặc nhập tên/email học viên trên danh sách đã tải.",
+        "Hệ thống/giao diện hiển thị khóa, số bài hoàn thành, tỷ lệ tiến độ, điểm trung bình, trạng thái và ngày ghi danh.",
+        "Người quản lý chọn Xem ở một học viên.",
+        "Giao diện mở hồ sơ học tập với các thông tin tiến độ và điểm hiện có."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Không có bản ghi phù hợp: thông báo không có dữ liệu."
+        ],
+        [
+          "3a",
+          "Học viên chưa có bài graded: hiển thị chưa có điểm trung bình."
+        ],
+        [
+          "4a",
+          "Đăng ký đang pending: có thể chuyển sang chức năng Duyệt đăng ký; việc xem không tự duyệt."
+        ]
+      ],
+      "issues": [
+        "Một số câu nhận xét trong modal là nội dung tĩnh, chưa phải kết luận tự động về năng lực/điểm danh. Danh sách cần tải lại để thấy dữ liệu mới."
+      ],
+      "endpoints": [
+        "GET /api/courses",
+        "GET /api/enrollments"
+      ],
+      "tables": [
+        "courses",
+        "users",
+        "enrollments",
+        "lessons",
+        "progress",
+        "attempts"
+      ]
+    },
+    {
+      "id": "UC22",
+      "n": 22,
+      "name": "Chấm bài và nhận xét",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý xem bài đã nộp, đặt điểm tổng cuối cùng và gửi nhận xét cho học viên.",
+      "pre": "Đã đăng nhập với quyền quản lý khóa của bài làm; bài đã nộp, không còn in_progress.",
+      "post": "Thành công: cập nhật điểm tổng, trạng thái graded, người chấm và nhận xét; tạo thông báo nếu bước thông báo thành công. Không đồng nghĩa đã chấm lại từng chi tiết câu hỏi.",
+      "trigger": "Người quản lý chọn Xem & chấm trong Bài nộp & chấm điểm.",
+      "main": [
+        "Người quản lý mở danh sách bài nộp, có thể lọc chờ chấm hoặc đã chấm.",
+        "Người quản lý chọn bài để xem câu trả lời và kết quả hiện có.",
+        "Người quản lý nhập điểm tổng 0–100 và nhận xét.",
+        "Hệ thống kiểm tra quyền, trạng thái bài và điểm hợp lệ.",
+        "Hệ thống cập nhật điểm tổng, kết quả đạt/chưa đạt theo ngưỡng, trạng thái graded và người chấm.",
+        "Hệ thống tạo thông báo cho học viên; giao diện đóng form và tải lại danh sách."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Bài chưa nộp hoặc không có quyền: từ chối chấm."
+        ],
+        [
+          "4b",
+          "Điểm ngoài 0–100 hoặc không phải số hợp lệ: yêu cầu nhập lại."
+        ],
+        [
+          "1a",
+          "Chọn bài đã graded: vẫn có thể sửa lại điểm tổng và nhận xét trong phạm vi quyền."
+        ],
+        [
+          "6a",
+          "Lỗi tạo thông báo sau lưu điểm: điểm có thể đã cập nhật; cần tải lại kiểm tra trước khi chấm lại."
+        ]
+      ],
+      "issues": [
+        "Giao diện chấm điểm tổng, chưa có rubric hay nhập điểm từng câu. Cờ cần chấm ở chi tiết có thể chưa được đồng bộ theo điểm tổng; API không gọi thủ tục chấm từng câu có sẵn trong SQL."
+      ],
+      "endpoints": [
+        "GET /api/submissions",
+        "GET /api/submissions/:id",
+        "PUT /api/submissions/:id/grade"
+      ],
+      "tables": [
+        "attempts",
+        "courses",
+        "users",
+        "exams",
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC23",
+      "n": 23,
+      "name": "Quản lý lộ trình học tập",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý tạo lộ trình và sắp thứ tự các khóa trong phạm vi mình được quản lý.",
+      "pre": "Đã đăng nhập với vai trò giáo viên/admin; các khóa đưa vào lộ trình phải thuộc phạm vi quản lý.",
+      "post": "Thành công: lưu metadata và danh sách khóa có thứ tự trong giao dịch, hoặc gỡ lộ trình cùng liên kết khóa; không xóa khóa học gốc.",
+      "trigger": "Người quản lý mở Lộ trình học tập trong khu vực giảng dạy.",
+      "main": [
+        "Hệ thống tải lộ trình, chương trình và khóa được quản lý.",
+        "Người quản lý chọn thêm mới, sửa hoặc xóa; với thêm/sửa, nhập tiêu đề, mô tả, chương trình tùy chọn, trình độ, số ngày dự kiến và trạng thái xuất bản.",
+        "Với thêm/sửa, người quản lý chọn các khóa theo thứ tự mong muốn.",
+        "Hệ thống kiểm tra dữ liệu, ID không trùng và quyền quản lý từng khóa.",
+        "Hệ thống lưu metadata và thay liên kết thứ tự trong giao dịch; thao tác xóa gỡ liên kết rồi xóa lộ trình.",
+        "Giao diện tải lại; học viên có thể thấy lộ trình đã xuất bản."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Khóa không tồn tại hoặc ngoài quyền quản lý: từ chối, hoàn tác phần lưu trong giao dịch."
+        ],
+        [
+          "4b",
+          "ID khóa trùng hoặc dữ liệu sai: yêu cầu điều chỉnh."
+        ],
+        [
+          "3a",
+          "Muốn thay thứ tự trong giao diện hiện tại: bỏ chọn và chọn lại theo thứ tự; hệ thống giữ thứ tự mảng được gửi."
+        ]
+      ],
+      "issues": [
+        "Chưa có yêu cầu cùng chương trình giữa mọi khóa của lộ trình, chưa có điều kiện tiên quyết hay AI cá nhân hóa; không phát sinh ghi danh riêng vào lộ trình."
+      ],
+      "endpoints": [
+        "GET /api/learning-paths",
+        "POST /api/learning-paths",
+        "PUT /api/learning-paths/:id",
+        "DELETE /api/learning-paths/:id"
+      ],
+      "tables": [
+        "learning_paths",
+        "path_courses",
+        "courses",
+        "programs"
+      ]
+    },
+    {
+      "id": "UC24",
+      "n": 24,
+      "name": "Quản lý tài khoản",
+      "actors": [
+        "AD"
+      ],
+      "summary": "Admin tạo, tra cứu, sửa thông tin, khóa/mở khóa, đặt mật khẩu hoặc xóa tài khoản theo ràng buộc.",
+      "pre": "Đã đăng nhập bằng tài khoản admin đang hoạt động.",
+      "post": "Thành công: dữ liệu tài khoản được lưu hoặc xóa khi hợp lệ; đổi mật khẩu/khóa tài khoản thu hồi phiên liên quan. Thay đổi vai trò được phân tích riêng ở UC25.",
+      "trigger": "Admin mở Quản lý người dùng.",
+      "main": [
+        "Hệ thống hiển thị danh sách tài khoản có tìm kiếm, lọc vai trò và phân trang.",
+        "Admin chọn thêm mới, sửa tài khoản, đổi trạng thái, đặt mật khẩu mới hoặc xóa.",
+        "Với thêm/sửa, admin nhập các trường được phép; tạo mới có email, mật khẩu và vai trò ban đầu.",
+        "Hệ thống kiểm tra dữ liệu, tính duy nhất và ràng buộc tự quản trị.",
+        "Hệ thống lưu tài khoản; thu hồi phiên khi đổi mật khẩu/khóa; với xóa, kiểm tra chủ sở hữu nội dung và xử lý dữ liệu liên quan trong giao dịch.",
+        "Giao diện làm mới danh sách và hiển thị kết quả."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Email trùng, mật khẩu tạo mới không hợp lệ hoặc dữ liệu thiếu: từ chối lưu."
+        ],
+        [
+          "4b",
+          "Admin tự khóa hoặc tự xóa tài khoản đang dùng: từ chối."
+        ],
+        [
+          "5a",
+          "Tài khoản còn phụ trách khóa/lộ trình: từ chối xóa; có thể khóa tài khoản theo quyền."
+        ],
+        [
+          "2a",
+          "Admin hủy xác nhận xóa: không thay đổi dữ liệu."
+        ]
+      ],
+      "issues": [
+        "Chưa có email gửi mật khẩu mới hoặc khôi phục tự phục vụ. Giao diện không cho sửa email tài khoản đã có dù API admin có thể nhận email hợp lệ."
+      ],
+      "endpoints": [
+        "GET /api/users",
+        "POST /api/users",
+        "PUT /api/users/:id",
+        "DELETE /api/users/:id"
+      ],
+      "tables": [
+        "users",
+        "sessions",
+        "courses",
+        "learning_paths",
+        "enrollments",
+        "attempts",
+        "progress",
+        "notifications"
+      ]
+    },
+    {
+      "id": "UC25",
+      "n": 25,
+      "name": "Cấp và thay đổi vai trò",
+      "actors": [
+        "AD"
+      ],
+      "summary": "Admin cấp quyền giáo viên hoặc đổi vai trò của một tài khoản đã có.",
+      "pre": "Admin đã đăng nhập; tài khoản đích tồn tại; vai trò thuộc student, teacher hoặc admin.",
+      "post": "Thành công: lưu vai trò mới và thu hồi các phiên cũ của tài khoản đích để quyền được áp dụng khi xác thực lại.",
+      "trigger": "Admin sửa tài khoản trong Quản lý người dùng và thay đổi trường Vai trò.",
+      "main": [
+        "Admin tìm tài khoản cần cấp/đổi quyền.",
+        "Admin mở form sửa và chọn vai trò mới.",
+        "Hệ thống kiểm tra vai trò hợp lệ và quyền admin.",
+        "Hệ thống kiểm tra ràng buộc: không tự hạ quyền của mình; không đổi giáo viên sang vai trò khác khi vẫn phụ trách khóa.",
+        "Hệ thống cập nhật vai trò và thu hồi phiên của tài khoản đích trong cùng giao dịch nếu vai trò thay đổi.",
+        "Giao diện thông báo thành công; tài khoản đích đăng nhập lại để dùng quyền mới."
+      ],
+      "extensions": [
+        [
+          "3a",
+          "Người gọi không có quyền admin hoặc role không hợp lệ: từ chối."
+        ],
+        [
+          "4a",
+          "Admin tự đổi mình sang vai trò khác admin: từ chối."
+        ],
+        [
+          "4b",
+          "Giáo viên còn phụ trách khóa mà bị đổi sang vai trò khác: từ chối và thông báo cần xử lý nội dung trước."
+        ],
+        [
+          "5a",
+          "Vai trò không đổi: không thu hồi phiên chỉ vì trường role được gửi lại cùng giá trị; các thay đổi mật khẩu/khóa khác vẫn có quy tắc riêng."
+        ]
+      ],
+      "issues": [
+        "Chưa có quy trình tự đăng ký làm giáo viên hoặc API chuyển giáo viên phụ trách khóa sau khi tạo. Thông báo cần chuyển khóa không có nghĩa chức năng chuyển đó đã được triển khai."
+      ],
+      "endpoints": [
+        "GET /api/users",
+        "PUT /api/users/:id"
+      ],
+      "tables": [
+        "users",
+        "courses",
+        "sessions"
+      ]
+    },
+    {
+      "id": "UC26",
+      "n": 26,
+      "name": "Quản lý chương trình đào tạo",
+      "actors": [
+        "AD"
+      ],
+      "summary": "Admin quản lý danh mục chương trình như CEFR, IELTS, tiếng Anh phổ thông, học thuật và giao tiếp.",
+      "pre": "Đã đăng nhập bằng tài khoản admin đang hoạt động.",
+      "post": "Thành công: chương trình được tạo/cập nhật/xóa; khi xóa trên SQL Server, liên kết chương trình ở khóa/lộ trình được đặt NULL, không xóa nội dung gốc.",
+      "trigger": "Admin mở Quản lý chương trình.",
+      "main": [
+        "Hệ thống tải danh mục chương trình.",
+        "Admin chọn thêm/sửa/xóa chương trình.",
+        "Với thêm/sửa, admin nhập tên, slug, mô tả và trạng thái hoạt động.",
+        "Hệ thống kiểm tra tên, chuẩn hóa slug và kiểm tra không trùng.",
+        "Hệ thống lưu chương trình; với xóa, gỡ liên kết chương trình khỏi khóa/lộ trình rồi xóa trong giao dịch.",
+        "Giao diện tải lại danh mục và thông báo kết quả."
+      ],
+      "extensions": [
+        [
+          "4a",
+          "Tên không hợp lệ hoặc slug trùng: yêu cầu điều chỉnh."
+        ],
+        [
+          "5a",
+          "Chương trình không tồn tại hoặc người gọi thiếu quyền: từ chối."
+        ],
+        [
+          "2a",
+          "Admin hủy xác nhận xóa: không thay đổi dữ liệu."
+        ]
+      ],
+      "issues": [
+        "Ẩn chương trình không tự động ẩn tất cả khóa đã xuất bản; trạng thái chương trình và khóa được kiểm tra theo chức năng riêng. Tên chương trình không phải chứng nhận đạt CEFR/band IELTS."
+      ],
+      "endpoints": [
+        "GET /api/programs",
+        "POST /api/programs",
+        "PUT /api/programs/:id",
+        "DELETE /api/programs/:id"
+      ],
+      "tables": [
+        "programs",
+        "courses",
+        "learning_paths"
+      ]
+    },
+    {
+      "id": "UC27",
+      "n": 27,
+      "name": "Xem thống kê giảng dạy",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "summary": "Người quản lý xem thống kê khóa, học viên, bài kiểm tra và kết quả trong phạm vi quản lý.",
+      "pre": "Đã đăng nhập với vai trò giáo viên/admin.",
+      "post": "Hiển thị thống kê theo dữ liệu hiện tại; không thay đổi điểm hay ghi danh.",
+      "trigger": "Người quản lý mở Tổng quan giảng dạy.",
+      "main": [
+        "Người quản lý mở trang tổng quan giảng dạy.",
+        "Hệ thống xác định các khóa được phép quản lý.",
+        "Hệ thống tổng hợp ghi danh, số đề, bài làm graded, phân bố điểm và tỷ lệ đạt theo ngưỡng thống kê.",
+        "Hệ thống tổng hợp số bài nộp theo 7 ngày gần nhất và thông tin một số khóa.",
+        "Giao diện hiển thị KPI, biểu đồ và các liên kết quản lý liên quan."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Giáo viên chưa có khóa: hiển thị thống kê rỗng hoặc 0."
+        ],
+        [
+          "3a",
+          "Chưa có bài graded: tỷ lệ/phân bố không có kết quả để tính."
+        ],
+        [
+          "3b",
+          "Admin mở trang này: thống kê trong phạm vi toàn bộ khóa mà admin quản lý."
+        ]
+      ],
+      "issues": [
+        "Tỷ lệ đạt dashboard hiện dùng ngưỡng 60% chung, không phải từng pass_score của đề. Một số nhãn nhắc “học kỳ” nhưng chưa có mô hình học kỳ hoặc bộ lọc tương ứng."
+      ],
+      "endpoints": [
+        "GET /api/dashboard/teacher",
+        "GET /api/courses"
+      ],
+      "tables": [
+        "courses",
+        "enrollments",
+        "exams",
+        "attempts"
+      ]
+    },
+    {
+      "id": "UC28",
+      "n": 28,
+      "name": "Xem thống kê toàn hệ thống",
+      "actors": [
+        "AD"
+      ],
+      "summary": "Admin xem số lượng người dùng, nội dung, ghi danh và lượt thi của toàn nền tảng.",
+      "pre": "Đã đăng nhập bằng tài khoản admin đang hoạt động.",
+      "post": "Hiển thị số liệu tổng hợp, người dùng mới và khóa được sắp theo lượng ghi danh; không tạo dữ liệu nghiệp vụ mới.",
+      "trigger": "Admin mở Tổng quan hệ thống.",
+      "main": [
+        "Admin mở trang tổng quan.",
+        "Hệ thống kiểm tra quyền admin.",
+        "Hệ thống đếm tài khoản theo vai trò, khóa/chương trình, ghi danh và lượt thi.",
+        "Hệ thống lấy người dùng mới và các khóa có số học viên active/completed cao.",
+        "Giao diện hiển thị số liệu và cho phép làm mới để lấy dữ liệu hiện tại."
+      ],
+      "extensions": [
+        [
+          "2a",
+          "Tài khoản không phải admin: từ chối truy cập."
+        ],
+        [
+          "3a",
+          "Chưa có dữ liệu của một nhóm: hiển thị 0 hoặc danh sách trống."
+        ],
+        [
+          "5a",
+          "Lỗi lấy dữ liệu: hiển thị lỗi/tùy chọn tải lại, không suy số liệu demo thay cho kết quả lỗi."
+        ]
+      ],
+      "issues": [
+        "Cần đồng bộ tên trường student_count của API với total_students mà thẻ top-course đang đọc. Chưa có thống kê doanh thu/thanh toán hoặc nhật ký kiểm toán toàn hệ thống."
+      ],
+      "endpoints": [
+        "GET /api/dashboard/admin"
+      ],
+      "tables": [
+        "users",
+        "programs",
+        "courses",
+        "enrollments",
+        "attempts",
+        "lessons"
+      ]
+    }
+  ]
+}
