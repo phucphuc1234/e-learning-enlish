@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   HiPlus,
   HiAcademicCap,
   HiPencilSquare,
   HiTrash,
   HiCheckCircle,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import programApi from '../../api/programApi';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import Loading from '../../components/common/Loading';
-import { slugify } from '../../utils/helpers';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import programApi from "../../api/programApi";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Loading from "../../components/common/Loading";
+import { slugify } from "../../utils/helpers";
 
 const ProgramManagement = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProgram, setEditingProgram] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
+    name: "",
+    slug: "",
+    description: "",
     is_active: 1,
   });
 
@@ -36,10 +36,9 @@ const ProgramManagement = () => {
   const [programToDelete, setProgramToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-
   const fetchPrograms = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const res = await programApi.getPrograms({
@@ -48,20 +47,17 @@ const ProgramManagement = () => {
       });
 
       if (!res?.success || !Array.isArray(res.data)) {
-        throw new Error('Dữ liệu chương trình không hợp lệ');
+        throw new Error("Dữ liệu chương trình không hợp lệ");
       }
 
       setPrograms(res.data);
     } catch (err) {
       setPrograms([]);
-      setError(
-        err.message || 'Không thể tải chương trình từ SQL Server'
-      );
+      setError(err.message || "Không thể tải chương trình từ máy chủ");
     } finally {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchPrograms();
@@ -70,9 +66,9 @@ const ProgramManagement = () => {
   const handleOpenAdd = () => {
     setEditingProgram(null);
     setFormData({
-      name: '',
-      slug: '',
-      description: '',
+      name: "",
+      slug: "",
+      description: "",
       is_active: 1,
     });
     setModalOpen(true);
@@ -81,9 +77,9 @@ const ProgramManagement = () => {
   const handleOpenEdit = (prog) => {
     setEditingProgram(prog);
     setFormData({
-      name: prog.name || '',
-      slug: prog.slug || '',
-      description: prog.description || '',
+      name: prog.name || "",
+      slug: prog.slug || "",
+      description: prog.description || "",
       is_active: prog.is_active ? 1 : 0,
     });
     setModalOpen(true);
@@ -101,7 +97,7 @@ const ProgramManagement = () => {
   const handleSaveProgram = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      toast.error('Vui lòng nhập tên chương trình!');
+      toast.error("Vui lòng nhập tên chương trình!");
       return;
     }
 
@@ -109,15 +105,15 @@ const ProgramManagement = () => {
     try {
       if (editingProgram) {
         await programApi.updateProgram(editingProgram.id, formData);
-        toast.success('Cập nhật chương trình thành công!');
+        toast.success("Cập nhật chương trình thành công!");
       } else {
         await programApi.createProgram(formData);
-        toast.success('Thêm chương trình đào tạo mới thành công!');
+        toast.success("Thêm chương trình đào tạo mới thành công!");
       }
       setModalOpen(false);
       fetchPrograms();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu chương trình');
+      toast.error(err.message || "Lỗi khi lưu chương trình");
     } finally {
       setFormLoading(false);
     }
@@ -133,12 +129,12 @@ const ProgramManagement = () => {
     setDeleteLoading(true);
     try {
       await programApi.deleteProgram(programToDelete.id);
-      toast.success('Xóa chương trình đào tạo thành công!');
+      toast.success("Xóa chương trình đào tạo thành công!");
       setDeleteConfirmOpen(false);
       setProgramToDelete(null);
       fetchPrograms();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa chương trình');
+      toast.error(err.message || "Lỗi khi xóa chương trình");
     } finally {
       setDeleteLoading(false);
     }
@@ -153,7 +149,7 @@ const ProgramManagement = () => {
             Chương Trình Đào Tạo
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Quản lý các hệ đào tạo tiếng Anh chuẩn quốc tế (CEFR, IELTS, THPT, Giao tiếp...)
+            Tổ chức các chương trình và nhóm khóa học của hệ thống
           </p>
         </div>
 
@@ -205,13 +201,18 @@ const ProgramManagement = () => {
                     </div>
                   </div>
 
-                  <Badge variant={program.is_active ? 'success' : 'gray'} dot size="sm">
-                    {program.is_active ? 'Kích hoạt' : 'Ẩn'}
+                  <Badge
+                    variant={program.is_active ? "success" : "gray"}
+                    dot
+                    size="sm"
+                  >
+                    {program.is_active ? "Kích hoạt" : "Ẩn"}
                   </Badge>
                 </div>
 
                 <p className="mt-3.5 text-xs text-gray-600 line-clamp-2 leading-relaxed">
-                  {program.description || 'Chương trình đào tạo chuyên sâu theo chuẩn đầu ra.'}
+                  {program.description ||
+                    "Chương trình đào tạo chuyên sâu theo chuẩn đầu ra."}
                 </p>
               </div>
 
@@ -249,7 +250,9 @@ const ProgramManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingProgram ? 'Chỉnh Sửa Chương Trình' : 'Thêm Chương Trình Mới'}
+        title={
+          editingProgram ? "Chỉnh Sửa Chương Trình" : "Thêm Chương Trình Mới"
+        }
         size="md"
         footer={
           <>
@@ -266,7 +269,7 @@ const ProgramManagement = () => {
               loading={formLoading}
               onClick={handleSaveProgram}
             >
-              {editingProgram ? 'Lưu thay đổi' : 'Thêm chương trình'}
+              {editingProgram ? "Lưu thay đổi" : "Thêm chương trình"}
             </Button>
           </>
         }
@@ -295,7 +298,9 @@ const ProgramManagement = () => {
             <textarea
               rows={3}
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Mô tả mục tiêu, đối tượng và chuẩn đầu ra của chương trình..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
             />
@@ -307,7 +312,9 @@ const ProgramManagement = () => {
             </label>
             <select
               value={formData.is_active}
-              onChange={(e) => setFormData({ ...formData, is_active: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, is_active: Number(e.target.value) })
+              }
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
             >
               <option value={1}>Hoạt động / Công khai</option>

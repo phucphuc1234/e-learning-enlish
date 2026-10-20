@@ -1,27 +1,27 @@
-import React from 'react';
-import Modal from './Modal';
-import Button from './Button';
-import { HiExclamationTriangle, HiInformationCircle } from 'react-icons/hi2';
+import React from "react";
+import Modal from "./Modal";
+import Button from "./Button";
+import { HiExclamationTriangle, HiInformationCircle } from "react-icons/hi2";
 
 const ConfirmDialog = ({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Xác nhận hành động',
-  message = 'Bạn có chắc chắn muốn thực hiện hành động này không? Thao tác này không thể hoàn tác.',
-  confirmText = 'Xác nhận',
-  cancelText = 'Hủy bỏ',
-  variant = 'danger',
+  title = "Xác nhận hành động",
+  message = "Bạn có chắc chắn muốn thực hiện hành động này không? Thao tác này không thể hoàn tác.",
+  confirmText = "Xác nhận",
+  cancelText = "Hủy bỏ",
+  variant = "danger",
   loading = false,
 }) => {
-  const isDanger = variant === 'danger';
+  const isDanger = variant === "danger";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm">
       <div className="flex items-start gap-4">
         <div
           className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center ${
-            isDanger ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+            isDanger ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"
           }`}
         >
           {isDanger ? (
@@ -32,7 +32,9 @@ const ConfirmDialog = ({
         </div>
         <div>
           <h4 className="text-base font-semibold text-gray-900">{title}</h4>
-          <p className="mt-1.5 text-sm text-gray-600 leading-relaxed">{message}</p>
+          <p className="mt-1.5 text-sm text-gray-600 leading-relaxed">
+            {message}
+          </p>
         </div>
       </div>
 
@@ -46,7 +48,7 @@ const ConfirmDialog = ({
           {cancelText}
         </Button>
         <Button
-          variant={isDanger ? 'danger' : 'primary'}
+          variant={isDanger ? "danger" : "primary"}
           onClick={onConfirm}
           loading={loading}
           size="sm"

@@ -1,42 +1,40 @@
-
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import {
   HiUsers,
   HiBookOpen,
   HiAcademicCap,
   HiUserGroup,
-} from 'react-icons/hi2';
+} from "react-icons/hi2";
 
-import dashboardApi from '../../api/dashboardApi';
-import StatsCard from '../../components/common/StatsCard';
-import Card from '../../components/common/Card';
-import Loading from '../../components/common/Loading';
+import dashboardApi from "../../api/dashboardApi";
+import StatsCard from "../../components/common/StatsCard";
+import Card from "../../components/common/Card";
+import Loading from "../../components/common/Loading";
 
-const formatNumber = (value) =>
-  Number(value ?? 0).toLocaleString('vi-VN');
+const formatNumber = (value) => Number(value ?? 0).toLocaleString("vi-VN");
 
 const AdminDashboard = () => {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const fetchDashboard = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await dashboardApi.getStats();
 
       if (!response.success || !response.data) {
-        throw new Error('Dữ liệu trả về không hợp lệ');
+        throw new Error("Dữ liệu trả về không hợp lệ");
       }
 
       setDashboard(response.data);
     } catch (err) {
       setDashboard(null);
-      setError(err.message || 'Không tải được Dashboard');
+      setError(err.message || "Không tải được Dashboard");
     } finally {
       setLoading(false);
     }
@@ -47,7 +45,7 @@ const AdminDashboard = () => {
   }, []);
 
   if (loading) {
-    return <Loading text="Đang tải dữ liệu từ SQL Server..." />;
+    return <Loading text="Đang tải dữ liệu từ máy chủ..." />;
   }
 
   if (error) {
@@ -75,7 +73,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -83,7 +80,7 @@ const AdminDashboard = () => {
           </h1>
 
           <p className="text-sm text-gray-500 mt-1">
-            Số liệu được lấy trực tiếp từ SQL Server
+            Số liệu được lấy trực tiếp từ máy chủ
           </p>
         </div>
 
@@ -96,7 +93,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
         <StatsCard
           title="Tổng người dùng"
           value={formatNumber(overview.total_users)}
@@ -125,16 +121,12 @@ const AdminDashboard = () => {
           icon={HiAcademicCap}
           color="amber"
         />
-
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
         <Card title="Người dùng mới nhất">
           {recentUsers.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              Chưa có người dùng.
-            </p>
+            <p className="text-gray-500 text-sm">Chưa có người dùng.</p>
           ) : (
             <div className="space-y-3">
               {recentUsers.map((user) => (
@@ -146,9 +138,7 @@ const AdminDashboard = () => {
                     <p className="font-semibold text-gray-800">
                       {user.full_name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {user.email}
-                    </p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
 
                   <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
@@ -169,19 +159,12 @@ const AdminDashboard = () => {
 
         <Card title="Khóa học có nhiều học viên">
           {topCourses.length === 0 ? (
-            <p className="text-gray-500 text-sm">
-              Chưa có khóa học.
-            </p>
+            <p className="text-gray-500 text-sm">Chưa có khóa học.</p>
           ) : (
             <div className="space-y-3">
               {topCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="border-b pb-3"
-                >
-                  <p className="font-semibold text-gray-800">
-                    {course.title}
-                  </p>
+                <div key={course.id} className="border-b pb-3">
+                  <p className="font-semibold text-gray-800">{course.title}</p>
 
                   <p className="text-xs text-gray-500 mt-1">
                     Giáo viên: {course.teacher_name}
@@ -195,13 +178,10 @@ const AdminDashboard = () => {
             </div>
           )}
         </Card>
-
       </div>
 
       <div className="bg-white rounded-xl border p-5">
-        <h2 className="font-bold text-gray-800 mb-4">
-          Thống kê hoạt động
-        </h2>
+        <h2 className="font-bold text-gray-800 mb-4">Thống kê hoạt động</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-blue-50 p-4 rounded-lg">
@@ -226,7 +206,6 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

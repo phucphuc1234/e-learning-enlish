@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { HiEnvelope, HiLockClosed, HiEye, HiEyeSlash } from 'react-icons/hi2';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
-import useAuth from '../../hooks/useAuth';
-import { USER_ROLES } from '../../utils/constants';
+import React, { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { HiEnvelope, HiLockClosed, HiEye, HiEyeSlash } from "react-icons/hi2";
+import Input from "../../components/common/Input";
+import Button from "../../components/common/Button";
+import useAuth from "../../hooks/useAuth";
+import { USER_ROLES } from "../../utils/constants";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -12,8 +12,8 @@ const LoginPage = () => {
   const location = useLocation();
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -23,14 +23,14 @@ const LoginPage = () => {
   const validate = () => {
     const errs = {};
     if (!formData.email.trim()) {
-      errs.email = 'Vui lòng nhập email';
+      errs.email = "Vui lòng nhập email";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errs.email = 'Email không hợp lệ';
+      errs.email = "Email không hợp lệ";
     }
     if (!formData.password) {
-      errs.password = 'Vui lòng nhập mật khẩu';
+      errs.password = "Vui lòng nhập mật khẩu";
     } else if (formData.password.length < 6) {
-      errs.password = 'Mật khẩu tối thiểu 6 ký tự';
+      errs.password = "Mật khẩu tối thiểu 6 ký tự";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -40,10 +40,10 @@ const LoginPage = () => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -63,11 +63,11 @@ const LoginPage = () => {
       if (from) {
         navigate(from, { replace: true });
       } else if (user?.role === USER_ROLES.ADMIN) {
-        navigate('/admin/dashboard', { replace: true });
+        navigate("/admin/dashboard", { replace: true });
       } else if (user?.role === USER_ROLES.TEACHER) {
-        navigate('/teacher/dashboard', { replace: true });
+        navigate("/teacher/dashboard", { replace: true });
       } else {
-        navigate('/student/dashboard', { replace: true });
+        navigate("/student/dashboard", { replace: true });
       }
     } catch {
       // Toast handled by AuthContext
@@ -88,7 +88,9 @@ const LoginPage = () => {
   return (
     <div>
       <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Đăng Nhập</h2>
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+          Đăng Nhập
+        </h2>
         <p className="mt-1.5 text-xs text-gray-500">
           Nhập thông tin tài khoản của bạn để tiếp tục
         </p>
@@ -110,7 +112,7 @@ const LoginPage = () => {
         <Input
           label="Mật khẩu"
           name="password"
-          type={showPassword ? 'text' : 'password'}
+          type={showPassword ? "text" : "password"}
           placeholder="••••••••"
           value={formData.password}
           onChange={handleChange}
@@ -132,16 +134,9 @@ const LoginPage = () => {
             />
             <span>Ghi nhớ đăng nhập</span>
           </label>
-          <a
-            href="#forgot"
-            onClick={(e) => {
-              e.preventDefault();
-              alert('Vui lòng liên hệ quản trị viên qua email admin@elearning.com để đặt lại mật khẩu.');
-            }}
-            className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
-          >
+          <Link to="/help" className="text-blue-600">
             Quên mật khẩu?
-          </a>
+          </Link>
         </div>
 
         <Button
@@ -155,39 +150,12 @@ const LoginPage = () => {
         </Button>
       </form>
 
-      {/* Demo Credentials Helper */}
-      <div className="mt-6 pt-5 border-t border-gray-100">
-        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-center mb-3">
-          Tài khoản dùng thử nhanh
-        </p>
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            type="button"
-            onClick={() => handleDemoFill('admin@elearning.com', 'admin123')}
-            className="px-2 py-1.5 text-[11px] font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 border border-purple-200 transition-colors"
-          >
-            Quản trị viên
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoFill('teacher@elearning.com', 'teacher123')}
-            className="px-2 py-1.5 text-[11px] font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 border border-emerald-200 transition-colors"
-          >
-            Giáo viên
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoFill('student@elearning.com', 'student123')}
-            className="px-2 py-1.5 text-[11px] font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 border border-blue-200 transition-colors"
-          >
-            Học viên
-          </button>
-        </div>
-      </div>
-
       <div className="mt-6 text-center text-xs text-gray-500">
-        Chưa có tài khoản?{' '}
-        <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+        Chưa có tài khoản?{" "}
+        <Link
+          to="/register"
+          className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+        >
           Đăng ký ngay
         </Link>
       </div>

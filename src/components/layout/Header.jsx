@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HiBars3,
   HiBell,
@@ -8,18 +8,19 @@ import {
   HiCheckCircle,
   HiExclamationCircle,
   HiAcademicCap,
-} from 'react-icons/hi2';
-import useAuth from '../../hooks/useAuth';
-import { getInitials } from '../../utils/helpers';
-import { ROLE_LABELS } from '../../utils/constants';
-import notificationApi from '../../api/notificationApi';
+} from "react-icons/hi2";
+import useAuth from "../../hooks/useAuth";
+import { getInitials } from "../../utils/helpers";
+import { ROLE_LABELS } from "../../utils/constants";
+import notificationApi from "../../api/notificationApi";
 
 const Header = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
+  const [notificationDropdownOpen, setNotificationDropdownOpen] =
+    useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -61,8 +62,8 @@ const Header = ({ onToggleSidebar }) => {
         setNotificationDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleMarkAllRead = async () => {
@@ -77,7 +78,7 @@ const Header = ({ onToggleSidebar }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -102,7 +103,7 @@ const Header = ({ onToggleSidebar }) => {
               E-Learning <span className="text-blue-600">English</span>
             </span>
             <span className="text-[10px] font-medium text-gray-400 block tracking-wider uppercase">
-              Luyện thi & Đào tạo chuẩn Quốc tế
+              Học tập, mỗi ngày.
             </span>
           </div>
         </Link>
@@ -117,11 +118,12 @@ const Header = ({ onToggleSidebar }) => {
             onClick={() => setNotificationDropdownOpen((prev) => !prev)}
             className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus:outline-none"
             title="Thông báo"
+            aria-label="Mở thông báo"
           >
             <HiBell className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
-                {unreadCount > 9 ? '9+' : unreadCount}
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
           </button>
@@ -129,7 +131,9 @@ const Header = ({ onToggleSidebar }) => {
           {notificationDropdownOpen && (
             <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white py-2 shadow-xl ring-1 ring-black/5 animate-fade-in border border-gray-100 z-50">
               <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                <span className="text-sm font-semibold text-gray-900">Thông báo</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  Thông báo
+                </span>
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
@@ -150,19 +154,23 @@ const Header = ({ onToggleSidebar }) => {
                     <div
                       key={n.id}
                       className={`flex gap-3 px-4 py-3 text-sm transition-colors hover:bg-gray-50 ${
-                        !n.is_read ? 'bg-blue-50/40' : ''
+                        !n.is_read ? "bg-blue-50/40" : ""
                       }`}
                     >
                       <div className="mt-0.5 flex-shrink-0">
-                        {n.type === 'success' || n.type === 'result' ? (
+                        {n.type === "success" || n.type === "result" ? (
                           <HiCheckCircle className="h-5 w-5 text-emerald-500" />
                         ) : (
                           <HiExclamationCircle className="h-5 w-5 text-blue-500" />
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs font-semibold text-gray-900">{n.title}</p>
-                        <p className="mt-0.5 text-xs text-gray-600 line-clamp-2">{n.message}</p>
+                        <p className="text-xs font-semibold text-gray-900">
+                          {n.title}
+                        </p>
+                        <p className="mt-0.5 text-xs text-gray-600 line-clamp-2">
+                          {n.message}
+                        </p>
                       </div>
                     </div>
                   ))
@@ -171,7 +179,7 @@ const Header = ({ onToggleSidebar }) => {
 
               <div className="border-t border-gray-100 px-4 py-2 text-center">
                 <Link
-                  to="/student/notifications"
+                  to="/notifications"
                   onClick={() => setNotificationDropdownOpen(false)}
                   className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
                 >
@@ -187,6 +195,7 @@ const Header = ({ onToggleSidebar }) => {
           <button
             type="button"
             onClick={() => setUserDropdownOpen((prev) => !prev)}
+            aria-label="Mở menu tài khoản"
             className="flex items-center gap-2.5 rounded-full p-1 sm:px-2.5 sm:py-1 hover:bg-gray-100 transition-colors focus:outline-none"
           >
             {user?.avatar ? (
@@ -202,10 +211,10 @@ const Header = ({ onToggleSidebar }) => {
             )}
             <div className="hidden text-left sm:block">
               <span className="block text-xs font-semibold text-gray-800 leading-tight">
-                {user?.full_name || 'Người dùng'}
+                {user?.full_name || "Người dùng"}
               </span>
               <span className="block text-[11px] text-gray-500 leading-tight">
-                {ROLE_LABELS[user?.role] || user?.role || 'Học viên'}
+                {ROLE_LABELS[user?.role] || user?.role || "Học viên"}
               </span>
             </div>
           </button>
@@ -213,8 +222,12 @@ const Header = ({ onToggleSidebar }) => {
           {userDropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white py-1.5 shadow-xl ring-1 ring-black/5 animate-fade-in border border-gray-100 z-50">
               <div className="border-b border-gray-100 px-4 py-3">
-                <p className="text-xs font-semibold text-gray-900 truncate">{user?.full_name}</p>
-                <p className="text-[11px] text-gray-500 truncate">{user?.email}</p>
+                <p className="text-xs font-semibold text-gray-900 truncate">
+                  {user?.full_name}
+                </p>
+                <p className="text-[11px] text-gray-500 truncate">
+                  {user?.email}
+                </p>
               </div>
 
               <div className="py-1">

@@ -1,12 +1,12 @@
-import React from 'react';
-import { HiOutlineFolderOpen } from 'react-icons/hi2';
+import React from "react";
+import { HiOutlineFolderOpen } from "react-icons/hi2";
 
 const EmptyState = ({
-  title = 'Không có dữ liệu',
-  message = 'Chưa có thông tin nào được hiển thị tại đây.',
+  title = "Không có dữ liệu",
+  message = "Chưa có thông tin nào được hiển thị tại đây.",
   icon: Icon = HiOutlineFolderOpen,
   action,
-  className = '',
+  className = "",
 }) => {
   return (
     <div className={`text-center py-12 px-4 ${className}`}>

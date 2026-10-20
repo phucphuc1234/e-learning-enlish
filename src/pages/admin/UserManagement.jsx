@@ -1,29 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import {
-  HiPlus,
-  HiPencilSquare,
-  HiTrash,
-  HiUserCircle,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import userApi from '../../api/userApi';
-import Table from '../../components/common/Table';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import SearchBar from '../../components/common/SearchBar';
-import Pagination from '../../components/common/Pagination';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import { USER_ROLES, ROLE_LABELS } from '../../utils/constants';
-import { formatDate } from '../../utils/helpers';
+import React, { useState, useEffect } from "react";
+import { HiPlus, HiPencilSquare, HiTrash, HiUserCircle } from "react-icons/hi2";
+import toast from "react-hot-toast";
+import userApi from "../../api/userApi";
+import Table from "../../components/common/Table";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import SearchBar from "../../components/common/SearchBar";
+import Pagination from "../../components/common/Pagination";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import { USER_ROLES, ROLE_LABELS } from "../../utils/constants";
+import { formatDate } from "../../utils/helpers";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -33,10 +28,10 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    password: '',
+    full_name: "",
+    email: "",
+    phone: "",
+    password: "",
     role: USER_ROLES.STUDENT,
     is_active: 1,
   });
@@ -46,10 +41,9 @@ const UserManagement = () => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-
   const fetchUsers = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const res = await userApi.getUsers({
@@ -60,23 +54,21 @@ const UserManagement = () => {
       });
 
       if (!res?.success || !Array.isArray(res.data)) {
-        throw new Error('Dữ liệu người dùng không hợp lệ');
+        throw new Error("Dữ liệu người dùng không hợp lệ");
       }
 
       setUsers(res.data);
       setTotalPages(res.pagination?.totalPages ?? 1);
       setTotalItems(res.pagination?.total ?? res.data.length);
-
     } catch (err) {
       setUsers([]);
       setTotalPages(1);
       setTotalItems(0);
-      setError(err.message || 'Không tải được danh sách người dùng');
+      setError(err.message || "Không tải được danh sách người dùng");
     } finally {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchUsers();
@@ -85,10 +77,10 @@ const UserManagement = () => {
   const handleOpenAddModal = () => {
     setEditingUser(null);
     setFormData({
-      full_name: '',
-      email: '',
-      phone: '',
-      password: '',
+      full_name: "",
+      email: "",
+      phone: "",
+      password: "",
       role: USER_ROLES.STUDENT,
       is_active: 1,
     });
@@ -98,10 +90,10 @@ const UserManagement = () => {
   const handleOpenEditModal = (user) => {
     setEditingUser(user);
     setFormData({
-      full_name: user.full_name || '',
-      email: user.email || '',
-      phone: user.phone || '',
-      password: '', // Leave blank unless updating
+      full_name: user.full_name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      password: "", // Leave blank unless updating
       role: user.role || USER_ROLES.STUDENT,
       is_active: user.is_active ? 1 : 0,
     });
@@ -111,7 +103,7 @@ const UserManagement = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!formData.full_name.trim() || !formData.email.trim()) {
-      toast.error('Vui lòng điền đầy đủ họ tên và email!');
+      toast.error("Vui lòng điền đầy đủ họ tên và email!");
       return;
     }
 
@@ -119,20 +111,20 @@ const UserManagement = () => {
     try {
       if (editingUser) {
         await userApi.updateUser(editingUser.id, formData);
-        toast.success('Cập nhật người dùng thành công!');
+        toast.success("Cập nhật người dùng thành công!");
       } else {
         if (!formData.password) {
-          toast.error('Vui lòng nhập mật khẩu cho tài khoản mới!');
+          toast.error("Vui lòng nhập mật khẩu cho tài khoản mới!");
           setFormLoading(false);
           return;
         }
         await userApi.createUser(formData);
-        toast.success('Tạo tài khoản người dùng mới thành công!');
+        toast.success("Tạo tài khoản người dùng mới thành công!");
       }
       setModalOpen(false);
       fetchUsers();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu thông tin người dùng');
+      toast.error(err.message || "Lỗi khi lưu thông tin người dùng");
     } finally {
       setFormLoading(false);
     }
@@ -148,12 +140,12 @@ const UserManagement = () => {
     setDeleteLoading(true);
     try {
       await userApi.deleteUser(userToDelete.id);
-      toast.success('Đã xóa người dùng thành công!');
+      toast.success("Đã xóa người dùng thành công!");
       setDeleteConfirmOpen(false);
       setUserToDelete(null);
       fetchUsers();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa người dùng');
+      toast.error(err.message || "Lỗi khi xóa người dùng");
     } finally {
       setDeleteLoading(false);
     }
@@ -161,59 +153,66 @@ const UserManagement = () => {
 
   const columns = [
     {
-      key: 'full_name',
-      header: 'Người dùng',
+      key: "full_name",
+      header: "Người dùng",
       render: (_, row) => (
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs uppercase shadow-sm">
-            {row.full_name ? row.full_name.charAt(0) : <HiUserCircle className="w-5 h-5" />}
+            {row.full_name ? (
+              row.full_name.charAt(0)
+            ) : (
+              <HiUserCircle className="w-5 h-5" />
+            )}
           </div>
           <div>
-            <p className="font-semibold text-gray-900 text-xs">{row.full_name}</p>
+            <p className="font-semibold text-gray-900 text-xs">
+              {row.full_name}
+            </p>
             <p className="text-[11px] text-gray-400">{row.email}</p>
           </div>
         </div>
       ),
     },
     {
-      key: 'role',
-      header: 'Vai trò',
+      key: "role",
+      header: "Vai trò",
       render: (role) => {
         const variants = {
-          admin: 'purple',
-          teacher: 'info',
-          student: 'primary',
+          admin: "purple",
+          teacher: "info",
+          student: "primary",
         };
         return (
-          <Badge variant={variants[role] || 'gray'} size="sm">
+          <Badge variant={variants[role] || "gray"} size="sm">
             {ROLE_LABELS[role] || role}
           </Badge>
         );
       },
     },
     {
-      key: 'phone',
-      header: 'Số điện thoại',
-      render: (phone) => phone || <span className="text-gray-400 italic">Chưa cập nhật</span>,
+      key: "phone",
+      header: "Số điện thoại",
+      render: (phone) =>
+        phone || <span className="text-gray-400 italic">Chưa cập nhật</span>,
     },
     {
-      key: 'is_active',
-      header: 'Trạng thái',
+      key: "is_active",
+      header: "Trạng thái",
       render: (isActive) => (
-        <Badge variant={isActive ? 'success' : 'danger'} dot size="sm">
-          {isActive ? 'Hoạt động' : 'Tạm khóa'}
+        <Badge variant={isActive ? "success" : "danger"} dot size="sm">
+          {isActive ? "Hoạt động" : "Tạm khóa"}
         </Badge>
       ),
     },
     {
-      key: 'created_at',
-      header: 'Ngày tạo',
+      key: "created_at",
+      header: "Ngày tạo",
       render: (date) => formatDate(date),
     },
     {
-      key: 'actions',
-      header: 'Thao tác',
-      align: 'right',
+      key: "actions",
+      header: "Thao tác",
+      align: "right",
       render: (_, row) => (
         <div className="flex items-center justify-end gap-1.5">
           <button
@@ -291,9 +290,7 @@ const UserManagement = () => {
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-red-700 text-sm font-medium">
-            {error}
-          </p>
+          <p className="text-red-700 text-sm font-medium">{error}</p>
           <button
             type="button"
             onClick={fetchUsers}
@@ -324,7 +321,7 @@ const UserManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingUser ? 'Chỉnh Sửa Người Dùng' : 'Thêm Người Dùng Mới'}
+        title={editingUser ? "Chỉnh Sửa Người Dùng" : "Thêm Người Dùng Mới"}
         size="md"
         footer={
           <>
@@ -341,7 +338,7 @@ const UserManagement = () => {
               loading={formLoading}
               onClick={handleFormSubmit}
             >
-              {editingUser ? 'Lưu thay đổi' : 'Tạo người dùng'}
+              {editingUser ? "Lưu thay đổi" : "Tạo người dùng"}
             </Button>
           </>
         }
@@ -350,7 +347,9 @@ const UserManagement = () => {
           <Input
             label="Họ và tên"
             value={formData.full_name}
-            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, full_name: e.target.value })
+            }
             placeholder="Nhập họ và tên..."
             required
           />
@@ -360,7 +359,9 @@ const UserManagement = () => {
             disabled={Boolean(editingUser)}
             type="email"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
             placeholder="name@example.com"
             required
           />
@@ -368,15 +369,23 @@ const UserManagement = () => {
           <Input
             label="Số điện thoại"
             value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
             placeholder="0912345678"
           />
 
           <Input
-            label={editingUser ? 'Mật khẩu mới (bỏ trống nếu giữ nguyên)' : 'Mật khẩu'}
+            label={
+              editingUser
+                ? "Mật khẩu mới (bỏ trống nếu giữ nguyên)"
+                : "Mật khẩu"
+            }
             type="password"
             value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
             placeholder="••••••••"
             required={!editingUser}
           />
@@ -388,7 +397,9 @@ const UserManagement = () => {
               </label>
               <select
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
               >
                 <option value={USER_ROLES.STUDENT}>Học viên</option>
@@ -403,7 +414,12 @@ const UserManagement = () => {
               </label>
               <select
                 value={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    is_active: Number(e.target.value),
+                  })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
               >
                 <option value={1}>Hoạt động</option>

@@ -1,9 +1,9 @@
-import axiosClient from './axiosClient';
+import axiosClient from "./axiosClient";
 
 const notificationApi = {
-  getNotifications: (params) => axiosClient.get('/notifications', { params }),
+  getNotifications: (params) => axiosClient.get("/notifications", { params }),
   markAsRead: (id) => axiosClient.put(`/notifications/${id}/read`),
-  markAllAsRead: () => axiosClient.put('/notifications/read-all'),
+  markAllAsRead: () => axiosClient.put("/notifications/read-all"),
 };
 
 export default notificationApi;

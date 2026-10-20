@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { HiXMark } from 'react-icons/hi2';
+import React, { useEffect, useId, useRef } from "react";
+import { HiXMark } from "react-icons/hi2";
 
 const Modal = ({
   isOpen,
@@ -7,35 +7,58 @@ const Modal = ({
   title,
   children,
   footer,
-  size = 'md',
+  size = "md",
   closeOnBackdrop = true,
 }) => {
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  const titleId = useId();
   useEffect(() => {
+    const previous = document.activeElement;
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
+      if (e.key === "Escape" && isOpen) {
+        closeRef.current();
+      }
+      if (e.key === "Tab" && isOpen) {
+        const items = [
+          ...(dialogRef.current?.querySelectorAll(
+            "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]",
+          ) || []),
+        ].filter((el) => el.offsetParent !== null);
+        const first = items[0],
+          last = items.at(-1);
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
       }
     };
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+      requestAnimationFrame(() => dialogRef.current?.focus());
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+      if (isOpen) previous?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-6xl',
+    sm: "max-w-md",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl",
+    full: "max-w-6xl",
   };
 
   return (
@@ -49,15 +72,23 @@ const Modal = ({
       {/* Modal Dialog */}
       <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
         <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? titleId : undefined}
+          tabIndex={-1}
           className={`relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full ${sizeClasses[size] || sizeClasses.md} animate-fade-in border border-gray-100`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {title && (
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 bg-gray-50/50">
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              <h3 id={titleId} className="text-lg font-semibold text-gray-900">
+                {title}
+              </h3>
               <button
                 type="button"
+                aria-label="Đóng hộp thoại"
                 onClick={onClose}
                 className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors focus:outline-none"
               >
@@ -67,7 +98,9 @@ const Modal = ({
           )}
 
           {/* Body */}
-          <div className="px-6 py-5 max-h-[75vh] overflow-y-auto">{children}</div>
+          <div className="px-6 py-5 max-h-[75vh] overflow-y-auto">
+            {children}
+          </div>
 
           {/* Footer */}
           {footer && (

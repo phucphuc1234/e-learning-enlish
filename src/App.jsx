@@ -1,8 +1,8 @@
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './contexts/AuthContext';
-import AppRoutes from './routes/AppRoutes';
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./contexts/AuthContext";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
@@ -14,22 +14,22 @@ function App() {
           toastOptions={{
             duration: 3500,
             style: {
-              background: '#1e293b',
-              color: '#f8fafc',
-              fontSize: '13px',
-              borderRadius: '12px',
-              padding: '12px 16px',
+              background: "#1e293b",
+              color: "#f8fafc",
+              fontSize: "13px",
+              borderRadius: "12px",
+              padding: "12px 16px",
             },
             success: {
               iconTheme: {
-                primary: '#10b981',
-                secondary: '#ffffff',
+                primary: "#10b981",
+                secondary: "#ffffff",
               },
             },
             error: {
               iconTheme: {
-                primary: '#ef4444',
-                secondary: '#ffffff',
+                primary: "#ef4444",
+                secondary: "#ffffff",
               },
             },
           }}

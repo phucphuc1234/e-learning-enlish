@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HiUser,
   HiEnvelope,
@@ -9,22 +9,22 @@ import {
   HiEyeSlash,
   HiAcademicCap,
   HiUserGroup,
-} from 'react-icons/hi2';
-import Input from '../../components/common/Input';
-import Button from '../../components/common/Button';
-import useAuth from '../../hooks/useAuth';
-import { USER_ROLES } from '../../utils/constants';
+} from "react-icons/hi2";
+import Input from "../../components/common/Input";
+import Button from "../../components/common/Button";
+import useAuth from "../../hooks/useAuth";
+import { USER_ROLES } from "../../utils/constants";
 
 const RegisterPage = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
+    full_name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
     role: USER_ROLES.STUDENT,
     agreeTerms: false,
   });
@@ -35,23 +35,23 @@ const RegisterPage = () => {
   const validate = () => {
     const errs = {};
     if (!formData.full_name.trim()) {
-      errs.full_name = 'Vui lòng nhập họ và tên';
+      errs.full_name = "Vui lòng nhập họ và tên";
     }
     if (!formData.email.trim()) {
-      errs.email = 'Vui lòng nhập email';
+      errs.email = "Vui lòng nhập email";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errs.email = 'Email không hợp lệ';
+      errs.email = "Email không hợp lệ";
     }
     if (!formData.password) {
-      errs.password = 'Vui lòng nhập mật khẩu';
-    } else if (formData.password.length < 6) {
-      errs.password = 'Mật khẩu tối thiểu 6 ký tự';
+      errs.password = "Vui lòng nhập mật khẩu";
+    } else if (formData.password.length < 8) {
+      errs.password = "Mật khẩu tối thiểu 8 ký tự";
     }
     if (formData.password !== formData.confirmPassword) {
-      errs.confirmPassword = 'Mật khẩu xác nhận không khớp';
+      errs.confirmPassword = "Mật khẩu xác nhận không khớp";
     }
     if (!formData.agreeTerms) {
-      errs.agreeTerms = 'Bạn cần đồng ý với điều khoản dịch vụ';
+      errs.agreeTerms = "Bạn cần đồng ý với điều khoản dịch vụ";
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -61,10 +61,10 @@ const RegisterPage = () => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -83,7 +83,7 @@ const RegisterPage = () => {
       });
 
       // If registered successfully, navigate to login or dashboard
-      navigate('/login');
+      navigate("/student/dashboard");
     } catch {
       // Handled by context toast
     } finally {
@@ -94,46 +94,18 @@ const RegisterPage = () => {
   return (
     <div>
       <div className="mb-5 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Tạo Tài Khoản Mới</h2>
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+          Tạo Tài Khoản Mới
+        </h2>
         <p className="mt-1 text-xs text-gray-500">
-          Gia nhập cộng đồng luyện thi tiếng Anh chuẩn quốc tế
+          Bắt đầu hành trình học tiếng Anh của bạn
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3.5">
-        {/* Role Selector */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">
-            Bạn tham gia với vai trò:
-          </label>
-          <div className="grid grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={() => setFormData((prev) => ({ ...prev, role: USER_ROLES.STUDENT }))}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                formData.role === USER_ROLES.STUDENT
-                  ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
-                  : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <HiAcademicCap className="w-4 h-4 text-blue-600" />
-              <span>Học viên</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormData((prev) => ({ ...prev, role: USER_ROLES.TEACHER }))}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                formData.role === USER_ROLES.TEACHER
-                  ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
-                  : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <HiUserGroup className="w-4 h-4 text-blue-600" />
-              <span>Giáo viên</span>
-            </button>
-          </div>
-        </div>
-
+        <p className="rounded-xl bg-blue-50 p-3 text-xs text-blue-800">
+          Tạo tài khoản học viên. Tài khoản giáo viên được quản trị viên cấp.
+        </p>
         <Input
           label="Họ và tên"
           name="full_name"
@@ -171,7 +143,7 @@ const RegisterPage = () => {
           <Input
             label="Mật khẩu"
             name="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="Tối thiểu 6 ký tự"
             value={formData.password}
             onChange={handleChange}
@@ -185,7 +157,7 @@ const RegisterPage = () => {
           <Input
             label="Xác nhận mật khẩu"
             name="confirmPassword"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="Nhập lại mật khẩu"
             value={formData.confirmPassword}
             onChange={handleChange}
@@ -205,11 +177,16 @@ const RegisterPage = () => {
               className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span>
-              Tôi đồng ý với{' '}
-              <a href="#terms" className="text-blue-600 hover:underline">
+              Tôi đồng ý với{" "}
+              <a
+                href="/help"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
                 Điều khoản dịch vụ
-              </a>{' '}
-              và{' '}
+              </a>{" "}
+              và{" "}
               <a href="#privacy" className="text-blue-600 hover:underline">
                 Chính sách bảo mật
               </a>
@@ -232,8 +209,11 @@ const RegisterPage = () => {
       </form>
 
       <div className="mt-6 text-center text-xs text-gray-500">
-        Đã có tài khoản?{' '}
-        <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+        Đã có tài khoản?{" "}
+        <Link
+          to="/login"
+          className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+        >
           Đăng nhập ngay
         </Link>
       </div>

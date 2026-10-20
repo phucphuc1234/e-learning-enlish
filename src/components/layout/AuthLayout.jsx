@@ -1,6 +1,6 @@
-import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { HiAcademicCap } from 'react-icons/hi2';
+import React from "react";
+import { Outlet, Link } from "react-router-dom";
+import { HiAcademicCap } from "react-icons/hi2";
 
 const AuthLayout = () => {
   return (

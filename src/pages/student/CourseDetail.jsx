@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   HiBookOpen,
   HiClock,
@@ -10,19 +10,16 @@ import {
   HiAcademicCap,
   HiArrowLeft,
   HiShare,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import courseApi from '../../api/courseApi';
-import lessonApi from '../../api/lessonApi';
-import enrollmentApi from '../../api/enrollmentApi';
-import Button from '../../components/common/Button';
-import Badge from '../../components/common/Badge';
-import Loading from '../../components/common/Loading';
-import {
-  LEVEL_LABELS,
-  LEVEL_COLORS,
-} from '../../utils/constants';
-import { formatCurrency, formatDuration } from '../../utils/helpers';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import courseApi from "../../api/courseApi";
+import lessonApi from "../../api/lessonApi";
+import enrollmentApi from "../../api/enrollmentApi";
+import Button from "../../components/common/Button";
+import Badge from "../../components/common/Badge";
+import Loading from "../../components/common/Loading";
+import { LEVEL_LABELS, LEVEL_COLORS } from "../../utils/constants";
+import { formatCurrency, formatDuration } from "../../utils/helpers";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -31,6 +28,7 @@ const CourseDetail = () => {
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrollmentStatus, setEnrollmentStatus] = useState(null);
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -44,67 +42,23 @@ const CourseDetail = () => {
           enrollmentApi.checkEnrollment(id),
         ]);
 
-        if (cRes.status === 'fulfilled') {
+        if (cRes.status === "fulfilled") {
           setCourse(cRes.value?.data || cRes.value);
         } else {
-          // Fallback course detail
-          setCourse({
-            id: Number(id),
-            title: 'Luyện thi IELTS 6.5 - Listening & Speaking Toàn Diện',
-            description: 'Khóa học cung cấp lộ trình bài bản từ việc luyện nghe phát âm IPA, các bẫy thường gặp trong Section 1-4 đến kỹ năng phản xạ tự tin khi vấn đáp trực tiếp với giám khảo trong Speaking Part 1, 2, 3.',
-            level: 'intermediate',
-            price: 500000,
-            is_free: 0,
-            total_lessons: 24,
-            total_duration: 720,
-            teacher_name: 'ThS. Nguyễn Hoàng Nam (8.5 IELTS)',
-            requirements: [
-              'Trình độ đầu vào khuyến nghị tương đương CEFR B1 hoặc IELTS 5.0',
-              'Dành tối thiểu 45 phút mỗi ngày để luyện nghe và làm bài tập thực hành',
-            ],
-            objectives: [
-              'Nắm chắc kỹ năng bắt từ khóa (Keywords) và Paraphrasing trong bài nghe',
-              'Tự tin phát âm chuẩn bảng ngữ âm quốc tế IPA',
-              'Sở hữu dàn ý mẫu cho hơn 50 chủ đề Speaking Part 2 thịnh hành nhất',
-            ],
-          });
+          setCourse(null);
         }
 
-        if (lRes.status === 'fulfilled') {
+        if (lRes.status === "fulfilled") {
           const lList = lRes.value?.data || lRes.value || [];
           setLessons(Array.isArray(lList) ? lList : lList.lessons || []);
         } else {
-          setLessons([
-            {
-              id: 1,
-              title: 'Bài 1: Tổng quan bài thi IELTS Listening & Kỹ thuật nghe số, tên riêng',
-              duration: 35,
-              order_index: 1,
-            },
-            {
-              id: 2,
-              title: 'Bài 2: Chiến lược nghe Maps & Plan Labeling chuẩn xác',
-              duration: 45,
-              order_index: 2,
-            },
-            {
-              id: 3,
-              title: 'Bài 3: Ngữ âm nâng cao - Nối âm, nuốt âm và trọng âm câu',
-              duration: 40,
-              order_index: 3,
-            },
-            {
-              id: 4,
-              title: 'Bài 4: Chiến thuật xử lý Speaking Part 1 tự nhiên, không bị ngắc ngứ',
-              duration: 50,
-              order_index: 4,
-            },
-          ]);
+          setLessons([]);
         }
 
-        if (enCheck.status === 'fulfilled') {
+        if (enCheck.status === "fulfilled") {
           const res = enCheck.value?.data || enCheck.value;
-          setIsEnrolled(Boolean(res?.isEnrolled || res?.enrolled));
+          setIsEnrolled(Boolean(res?.is_enrolled));
+          setEnrollmentStatus(res?.status);
         }
       } finally {
         setLoading(false);
@@ -117,14 +71,21 @@ const CourseDetail = () => {
   const handleEnroll = async () => {
     setEnrollLoading(true);
     try {
-      await enrollmentApi.enrollCourse(id);
+      const response = await enrollmentApi.enrollCourse(id);
+      if (response.data.status === "pending") {
+        setEnrollmentStatus("pending");
+        toast.success(
+          "Đã gửi đăng ký. Giáo viên sẽ duyệt sau khi xác nhận học phí.",
+        );
+        return;
+      }
       setIsEnrolled(true);
-      toast.success('Đăng ký khóa học thành công! Bắt đầu học ngay nhé.');
+      toast.success("Đăng ký khóa học thành công! Bắt đầu học ngay nhé.");
       if (lessons.length > 0) {
         navigate(`/student/lesson/${lessons[0].id}`);
       }
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi đăng ký khóa học');
+      toast.error(err.message || "Lỗi khi đăng ký khóa học");
     } finally {
       setEnrollLoading(false);
     }
@@ -137,8 +98,13 @@ const CourseDetail = () => {
   if (!course) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-gray-500">Khóa học không tồn tại hoặc đã bị gỡ.</p>
-        <Link to="/student/courses" className="mt-4 inline-block text-blue-600 hover:underline text-xs">
+        <p className="text-sm text-gray-500">
+          Khóa học không tồn tại hoặc đã bị gỡ.
+        </p>
+        <Link
+          to="/student/courses"
+          className="mt-4 inline-block text-blue-600 hover:underline text-xs"
+        >
           Quay lại danh sách khóa học
         </Link>
       </div>
@@ -163,7 +129,7 @@ const CourseDetail = () => {
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={`text-xs px-3 py-1 rounded-full font-bold shadow-sm ${
-                LEVEL_COLORS[course.level] || 'bg-blue-50 text-blue-700'
+                LEVEL_COLORS[course.level] || "bg-blue-50 text-blue-700"
               }`}
             >
               {LEVEL_LABELS[course.level] || course.level}
@@ -185,18 +151,25 @@ const CourseDetail = () => {
             <div className="flex items-center gap-2">
               <HiUser className="w-4 h-4 text-blue-600" />
               <span>
-                Giảng viên: <strong className="text-gray-800">{course.teacher_name || 'Đội ngũ chuyên gia'}</strong>
+                Giảng viên:{" "}
+                <strong className="text-gray-800">
+                  {course.teacher_name || "Đội ngũ chuyên gia"}
+                </strong>
               </span>
             </div>
             <div className="flex items-center gap-2">
               <HiBookOpen className="w-4 h-4 text-blue-600" />
               <span>
-                Tổng số: <strong className="text-gray-800">{course.total_lessons || lessons.length}</strong> bài học
+                Tổng số:{" "}
+                <strong className="text-gray-800">
+                  {course.total_lessons || lessons.length}
+                </strong>{" "}
+                bài học
               </span>
             </div>
             <div className="flex items-center gap-2">
               <HiClock className="w-4 h-4 text-emerald-600" />
-              <span>{formatDuration(course.total_duration || 600)}</span>
+              <span>{formatDuration(course.total_duration ?? 0)}</span>
             </div>
           </div>
         </div>
@@ -208,17 +181,25 @@ const CourseDetail = () => {
               Học phí trọn gói
             </span>
             <div className="text-3xl font-black text-blue-600 mt-2">
-              {course.is_free ? 'Miễn phí' : formatCurrency(course.price)}
+              {course.is_free ? "Miễn phí" : formatCurrency(course.price)}
             </div>
             <p className="text-[11px] text-gray-500 mt-1">
-              Truy cập không giới hạn trọn đời
+              Học theo nhịp của bạn
             </p>
           </div>
 
           <div className="mt-6 space-y-3">
             {isEnrolled ? (
-              <Link to={`/student/lesson/${lessons[0]?.id || 1}`} className="w-full block">
-                <Button variant="primary" size="lg" fullWidth icon={HiPlayCircle}>
+              <Link
+                to={`/student/lesson/${lessons[0]?.id || 1}`}
+                className="w-full block"
+              >
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  icon={HiPlayCircle}
+                >
                   Vào học ngay
                 </Button>
               </Link>
@@ -228,14 +209,17 @@ const CourseDetail = () => {
                 size="lg"
                 fullWidth
                 loading={enrollLoading}
+                disabled={enrollmentStatus === "pending"}
                 onClick={handleEnroll}
               >
-                Đăng ký tham gia ngay
+                {enrollmentStatus === "pending"
+                  ? "Đang chờ duyệt đăng ký"
+                  : "Đăng ký tham gia ngay"}
               </Button>
             )}
 
             <p className="text-[11px] text-gray-400">
-              Cam kết chuẩn đầu ra • Hỗ trợ cố vấn 24/7
+              Tiến độ và kết quả được lưu trong tài khoản
             </p>
           </div>
         </div>
@@ -247,14 +231,17 @@ const CourseDetail = () => {
           {/* Objectives */}
           <div className="bg-white rounded-2xl border border-gray-200/90 p-6 shadow-sm">
             <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <HiAcademicCap className="w-5 h-5 text-blue-600" /> Bạn sẽ đạt được gì sau khóa học?
+              <HiAcademicCap className="w-5 h-5 text-blue-600" /> Bạn sẽ đạt
+              được gì sau khóa học?
             </h3>
             <ul className="space-y-2.5 text-xs text-gray-700">
-              {(course.objectives || [
-                'Làm chủ toàn diện các dạng bài thi tiếng Anh trọng tâm.',
-                'Nâng cao phản xạ nghe - hiểu tự nhiên qua audio chuẩn bản ngữ.',
-                'Hoàn thiện kỹ năng giải quyết bài tập và bài thi trắc nghiệm.',
-              ]).map((obj, i) => (
+              {(
+                course.objectives || [
+                  "Học lý thuyết và ví dụ trong từng bài.",
+                  "Luyện tập và xem phản hồi để củng cố kiến thức.",
+                  "Hoàn thiện kỹ năng giải quyết bài tập và bài thi trắc nghiệm.",
+                ]
+              ).map((obj, i) => (
                 <li key={i} className="flex items-start gap-2.5">
                   <HiCheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                   <span>{obj}</span>
@@ -282,7 +269,9 @@ const CourseDetail = () => {
                       {idx + 1}
                     </span>
                     <div>
-                      <p className="font-semibold text-gray-900">{lesson.title}</p>
+                      <p className="font-semibold text-gray-900">
+                        {lesson.title}
+                      </p>
                       <span className="text-[11px] text-gray-400">
                         {formatDuration(lesson.duration || 30)}
                       </span>
@@ -297,7 +286,10 @@ const CourseDetail = () => {
                         </Button>
                       </Link>
                     ) : (
-                      <span className="p-1.5 text-gray-300" title="Đăng ký để mở khóa">
+                      <span
+                        className="p-1.5 text-gray-300"
+                        title="Đăng ký để mở khóa"
+                      >
                         <HiLockClosed className="w-4 h-4" />
                       </span>
                     )}

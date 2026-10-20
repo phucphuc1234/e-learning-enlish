@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   HiPlus,
   HiClipboardDocumentCheck,
@@ -7,23 +7,24 @@ import {
   HiTrash,
   HiClock,
   HiUserGroup,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import examApi from '../../api/examApi';
-import courseApi from '../../api/courseApi';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
-import { EXAM_TYPES, EXAM_TYPE_LABELS } from '../../utils/constants';
-import { formatDuration } from '../../utils/helpers';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import examApi from "../../api/examApi";
+import courseApi from "../../api/courseApi";
+import questionApi from "../../api/questionApi";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
+import { EXAM_TYPES, EXAM_TYPE_LABELS } from "../../utils/constants";
+import { formatDuration } from "../../utils/helpers";
 
 const ExamManagement = () => {
   const [searchParams] = useSearchParams();
-  const defaultCourseId = searchParams.get('course_id') || '';
+  const defaultCourseId = searchParams.get("course_id") || "";
 
   const [exams, setExams] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -34,10 +35,19 @@ const ExamManagement = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [questionBank, setQuestionBank] = useState([]);
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
+  useEffect(() => {
+    if (modalOpen)
+      questionApi
+        .getQuestions({ limit: 200 })
+        .then((res) => setQuestionBank(res.data))
+        .catch((e) => toast.error(e.message));
+  }, [modalOpen]);
   const [formData, setFormData] = useState({
-    title: '',
-    course_id: '',
-    description: '',
+    title: "",
+    course_id: "",
+    description: "",
     type: EXAM_TYPES.QUIZ,
     time_limit: 45,
     pass_score: 50,
@@ -60,54 +70,17 @@ const ExamManagement = () => {
         examApi.getExams({ course_id: selectedCourseId || undefined }),
       ]);
 
-      if (coursesRes.status === 'fulfilled') {
+      if (coursesRes.status === "fulfilled") {
         const cList = coursesRes.value?.data || coursesRes.value || [];
         setCourses(Array.isArray(cList) ? cList : cList.courses || []);
       }
 
-      if (examsRes.status === 'fulfilled') {
+      if (examsRes.status === "fulfilled") {
         const list = examsRes.value?.data || examsRes.value || [];
         setExams(Array.isArray(list) ? list : list.exams || []);
       } else {
-        // Fallback sample exams
-        setExams([
-          {
-            id: 1,
-            title: 'IELTS Mock Test Listening - Test 1',
-            course_id: 1,
-            type: 'mock_test',
-            time_limit: 40,
-            total_questions: 40,
-            pass_score: 60,
-            max_attempts: 1,
-            is_published: 1,
-            submission_count: 58,
-          },
-          {
-            id: 2,
-            title: 'Kiểm tra Giữa kỳ Ngữ Pháp B2',
-            course_id: 2,
-            type: 'midterm',
-            time_limit: 45,
-            total_questions: 30,
-            pass_score: 50,
-            max_attempts: 2,
-            is_published: 1,
-            submission_count: 42,
-          },
-          {
-            id: 3,
-            title: 'Mini Quiz Kiểm Tra Từ Vựng Tuần 3',
-            course_id: 1,
-            type: 'quiz',
-            time_limit: 15,
-            total_questions: 15,
-            pass_score: 50,
-            max_attempts: 3,
-            is_published: 0,
-            submission_count: 0,
-          },
-        ]);
+        setExams([]);
+        toast.error(examsRes.reason?.message || "Không tải được bài thi");
       }
     } finally {
       setLoading(false);
@@ -120,10 +93,12 @@ const ExamManagement = () => {
 
   const handleOpenAdd = () => {
     setEditingExam(null);
+    setSelectedQuestions([]);
     setFormData({
-      title: '',
-      course_id: selectedCourseId || (courses[0]?.id ? String(courses[0].id) : '1'),
-      description: '',
+      title: "",
+      course_id:
+        selectedCourseId || (courses[0]?.id ? String(courses[0].id) : "1"),
+      description: "",
       type: EXAM_TYPES.QUIZ,
       time_limit: 45,
       pass_score: 50,
@@ -135,12 +110,19 @@ const ExamManagement = () => {
     setModalOpen(true);
   };
 
-  const handleOpenEdit = (exam) => {
+  const handleOpenEdit = async (exam) => {
+    try {
+      const res = await questionApi.getQuestions({ exam_id: exam.id });
+      setSelectedQuestions(res.data.map((q) => q.id));
+    } catch (e) {
+      toast.error(e.message);
+      return;
+    }
     setEditingExam(exam);
     setFormData({
-      title: exam.title || '',
-      course_id: exam.course_id || '',
-      description: exam.description || '',
+      title: exam.title || "",
+      course_id: exam.course_id || "",
+      description: exam.description || "",
       type: exam.type || EXAM_TYPES.QUIZ,
       time_limit: exam.time_limit || 45,
       pass_score: exam.pass_score || 50,
@@ -155,23 +137,33 @@ const ExamManagement = () => {
   const handleSaveExam = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      toast.error('Vui lòng nhập tên bài kiểm tra!');
+      toast.error("Vui lòng nhập tên bài kiểm tra!");
       return;
     }
 
+    if (!selectedQuestions.length && formData.is_published) {
+      toast.error("Vui lòng chọn ít nhất một câu hỏi trước khi xuất bản");
+      return;
+    }
     setFormLoading(true);
     try {
       if (editingExam) {
-        await examApi.updateExam(editingExam.id, formData);
-        toast.success('Cập nhật bài kiểm tra thành công!');
+        await examApi.updateExam(editingExam.id, {
+          ...formData,
+          question_ids: selectedQuestions,
+        });
+        toast.success("Cập nhật bài kiểm tra thành công!");
       } else {
-        await examApi.createExam(formData);
-        toast.success('Tạo bài kiểm tra mới thành công!');
+        await examApi.createExam({
+          ...formData,
+          question_ids: selectedQuestions,
+        });
+        toast.success("Tạo bài kiểm tra mới thành công!");
       }
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu bài kiểm tra');
+      toast.error(err.message || "Lỗi khi lưu bài kiểm tra");
     } finally {
       setFormLoading(false);
     }
@@ -187,12 +179,12 @@ const ExamManagement = () => {
     setDeleteLoading(true);
     try {
       await examApi.deleteExam(examToDelete.id);
-      toast.success('Xóa bài kiểm tra thành công!');
+      toast.success("Xóa bài kiểm tra thành công!");
       setDeleteConfirmOpen(false);
       setExamToDelete(null);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa bài kiểm tra');
+      toast.error(err.message || "Lỗi khi xóa bài kiểm tra");
     } finally {
       setDeleteLoading(false);
     }
@@ -207,7 +199,8 @@ const ExamManagement = () => {
             Quản Lý Đề Thi & Kiểm Tra
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Thiết lập các bài Quiz, kiểm tra giữa kỳ, thi thử (Mock Test) có bấm giờ tự động
+            Thiết lập các bài Quiz, kiểm tra giữa kỳ, thi thử (Mock Test) có bấm
+            giờ tự động
           </p>
         </div>
 
@@ -251,7 +244,12 @@ const ExamManagement = () => {
             title="Chưa có bài kiểm tra nào"
             message="Hãy tạo bài kiểm tra để đánh giá chuẩn xác năng lực học viên."
             action={
-              <Button variant="primary" size="sm" icon={HiPlus} onClick={handleOpenAdd}>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={HiPlus}
+                onClick={handleOpenAdd}
+              >
                 Tạo bài thi đầu tiên
               </Button>
             }
@@ -269,8 +267,12 @@ const ExamManagement = () => {
                   <Badge variant="purple" size="sm">
                     {EXAM_TYPE_LABELS[exam.type] || exam.type}
                   </Badge>
-                  <Badge variant={exam.is_published ? 'success' : 'gray'} dot size="sm">
-                    {exam.is_published ? 'Đang mở' : 'Đã khóa'}
+                  <Badge
+                    variant={exam.is_published ? "success" : "gray"}
+                    dot
+                    size="sm"
+                  >
+                    {exam.is_published ? "Đang mở" : "Đã khóa"}
                   </Badge>
                 </div>
 
@@ -278,7 +280,7 @@ const ExamManagement = () => {
                   {exam.title}
                 </h3>
                 <p className="mt-1 text-xs text-gray-500 line-clamp-2">
-                  {exam.description || 'Đề kiểm tra chuẩn kiến thức trọng tâm.'}
+                  {exam.description || "Đề kiểm tra chuẩn kiến thức trọng tâm."}
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-600 bg-gray-50/80 p-3 rounded-xl border border-gray-100">
@@ -288,7 +290,7 @@ const ExamManagement = () => {
                   </div>
                   <div className="flex items-center gap-1.5">
                     <HiClipboardDocumentCheck className="w-4 h-4 text-emerald-500" />
-                    <span>{exam.total_questions || 30} câu hỏi</span>
+                    <span>{exam.total_questions || 0} câu hỏi</span>
                   </div>
                   <div className="col-span-2 flex items-center justify-between text-[11px] pt-1 border-t border-gray-200/60 text-gray-500">
                     <span>Điểm qua: {exam.pass_score}%</span>
@@ -331,7 +333,7 @@ const ExamManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingExam ? 'Chỉnh Sửa Bài Kiểm Tra' : 'Tạo Bài Kiểm Tra Mới'}
+        title={editingExam ? "Chỉnh Sửa Bài Kiểm Tra" : "Tạo Bài Kiểm Tra Mới"}
         size="lg"
         footer={
           <>
@@ -348,7 +350,7 @@ const ExamManagement = () => {
               loading={formLoading}
               onClick={handleSaveExam}
             >
-              {editingExam ? 'Lưu thay đổi' : 'Tạo bài kiểm tra'}
+              {editingExam ? "Lưu thay đổi" : "Tạo bài kiểm tra"}
             </Button>
           </>
         }
@@ -357,7 +359,9 @@ const ExamManagement = () => {
           <Input
             label="Tiêu đề bài kiểm tra"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             placeholder="Ví dụ: Kiểm tra Giữa kỳ Ngữ Pháp B2..."
             required
           />
@@ -369,7 +373,11 @@ const ExamManagement = () => {
               </label>
               <select
                 value={formData.course_id}
-                onChange={(e) => setFormData({ ...formData, course_id: e.target.value })}
+                disabled={!!editingExam}
+                onChange={(e) => {
+                  setFormData({ ...formData, course_id: e.target.value });
+                  setSelectedQuestions([]);
+                }}
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
                 {courses.map((c) => (
@@ -386,37 +394,85 @@ const ExamManagement = () => {
               </label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, type: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
                 <option value={EXAM_TYPES.QUIZ}>Kiểm tra nhanh (Quiz)</option>
                 <option value={EXAM_TYPES.MIDTERM}>Kiểm tra giữa kỳ</option>
                 <option value={EXAM_TYPES.FINAL}>Kiểm tra cuối kỳ</option>
-                <option value={EXAM_TYPES.MOCK_TEST}>Thi thử chuẩn đề (Mock Test)</option>
+                <option value={EXAM_TYPES.MOCK_TEST}>
+                  Thi thử chuẩn đề (Mock Test)
+                </option>
               </select>
             </div>
           </div>
 
+          <fieldset className="rounded-xl border border-slate-200 p-4">
+            <legend className="px-2 text-sm font-semibold">
+              Câu hỏi trong đề ({selectedQuestions.length})
+            </legend>
+            <p className="mb-3 text-xs text-slate-500">
+              Chọn từ ngân hàng câu hỏi của khóa học. Tạo câu hỏi trong mục Quản
+              lý bài tập trước.
+            </p>
+            <div className="max-h-60 overflow-y-auto space-y-2">
+              {questionBank
+                .filter(
+                  (q) => String(q.course_id) === String(formData.course_id),
+                )
+                .map((q) => (
+                  <label
+                    key={q.id}
+                    className="flex items-start gap-3 rounded-lg bg-slate-50 p-3 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={selectedQuestions.includes(q.id)}
+                      onChange={(e) =>
+                        setSelectedQuestions(
+                          e.target.checked
+                            ? [...selectedQuestions, q.id]
+                            : selectedQuestions.filter((id) => id !== q.id),
+                        )
+                      }
+                    />
+                    {q.content}
+                  </label>
+                ))}
+            </div>
+          </fieldset>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input
               label="Thời gian làm bài (phút)"
               type="number"
               value={formData.time_limit}
-              onChange={(e) => setFormData({ ...formData, time_limit: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, time_limit: Number(e.target.value) })
+              }
               required
             />
             <Input
               label="Điểm đạt (%)"
               type="number"
               value={formData.pass_score}
-              onChange={(e) => setFormData({ ...formData, pass_score: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, pass_score: Number(e.target.value) })
+              }
               required
             />
             <Input
               label="Số lần làm tối đa"
               type="number"
               value={formData.max_attempts}
-              onChange={(e) => setFormData({ ...formData, max_attempts: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  max_attempts: Number(e.target.value),
+                })
+              }
               required
             />
           </div>
@@ -428,7 +484,9 @@ const ExamManagement = () => {
             <textarea
               rows={3}
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Quy định làm bài, cấu trúc đề thi..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
             />
@@ -439,7 +497,12 @@ const ExamManagement = () => {
               <input
                 type="checkbox"
                 checked={Boolean(formData.shuffle_questions)}
-                onChange={(e) => setFormData({ ...formData, shuffle_questions: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    shuffle_questions: e.target.checked ? 1 : 0,
+                  })
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span>Trộn ngẫu nhiên câu hỏi</span>
@@ -449,7 +512,12 @@ const ExamManagement = () => {
               <input
                 type="checkbox"
                 checked={Boolean(formData.show_answer_after)}
-                onChange={(e) => setFormData({ ...formData, show_answer_after: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    show_answer_after: e.target.checked ? 1 : 0,
+                  })
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span>Xem đáp án sau khi nộp</span>
@@ -459,7 +527,12 @@ const ExamManagement = () => {
               <input
                 type="checkbox"
                 checked={Boolean(formData.is_published)}
-                onChange={(e) => setFormData({ ...formData, is_published: e.target.checked ? 1 : 0 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    is_published: e.target.checked ? 1 : 0,
+                  })
+                }
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span>Công khai cho học viên</span>

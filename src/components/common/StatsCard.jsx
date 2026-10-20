@@ -1,41 +1,41 @@
-import React from 'react';
-import { HiArrowTrendingUp, HiArrowTrendingDown } from 'react-icons/hi2';
+import React from "react";
+import { HiArrowTrendingUp, HiArrowTrendingDown } from "react-icons/hi2";
 
 const StatsCard = ({
   title,
   value,
   icon: Icon,
   change,
-  changeType = 'increase',
+  changeType = "increase",
   subtitle,
-  color = 'blue',
-  className = '',
+  color = "blue",
+  className = "",
 }) => {
   const colorSchemes = {
     blue: {
-      bg: 'bg-blue-50',
-      text: 'text-blue-600',
-      border: 'border-blue-100',
+      bg: "bg-blue-50",
+      text: "text-blue-600",
+      border: "border-blue-100",
     },
     green: {
-      bg: 'bg-emerald-50',
-      text: 'text-emerald-600',
-      border: 'border-emerald-100',
+      bg: "bg-emerald-50",
+      text: "text-emerald-600",
+      border: "border-emerald-100",
     },
     amber: {
-      bg: 'bg-amber-50',
-      text: 'text-amber-600',
-      border: 'border-amber-100',
+      bg: "bg-amber-50",
+      text: "text-amber-600",
+      border: "border-amber-100",
     },
     purple: {
-      bg: 'bg-purple-50',
-      text: 'text-purple-600',
-      border: 'border-purple-100',
+      bg: "bg-purple-50",
+      text: "text-purple-600",
+      border: "border-purple-100",
     },
     rose: {
-      bg: 'bg-rose-50',
-      text: 'text-rose-600',
-      border: 'border-rose-100',
+      bg: "bg-rose-50",
+      text: "text-rose-600",
+      border: "border-rose-100",
     },
   };
 
@@ -47,8 +47,12 @@ const StatsCard = ({
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">{title}</p>
-          <h3 className="text-2xl font-bold text-gray-900 mt-1">{value ?? '0'}</h3>
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            {title}
+          </p>
+          <h3 className="text-2xl font-bold text-gray-900 mt-1">
+            {value ?? "0"}
+          </h3>
         </div>
         {Icon && (
           <div
@@ -64,16 +68,16 @@ const StatsCard = ({
           {change != null && (
             <span
               className={`inline-flex items-center font-medium ${
-                changeType === 'increase'
-                  ? 'text-emerald-600'
-                  : changeType === 'decrease'
-                  ? 'text-rose-600'
-                  : 'text-gray-500'
+                changeType === "increase"
+                  ? "text-emerald-600"
+                  : changeType === "decrease"
+                    ? "text-rose-600"
+                    : "text-gray-500"
               }`}
             >
-              {changeType === 'increase' ? (
+              {changeType === "increase" ? (
                 <HiArrowTrendingUp className="w-3.5 h-3.5 mr-0.5" />
-              ) : changeType === 'decrease' ? (
+              ) : changeType === "decrease" ? (
                 <HiArrowTrendingDown className="w-3.5 h-3.5 mr-0.5" />
               ) : null}
               {change}

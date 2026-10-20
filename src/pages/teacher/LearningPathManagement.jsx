@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   HiPlus,
   HiMap,
@@ -6,26 +6,35 @@ import {
   HiTrash,
   HiClock,
   HiBookOpen,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import learningPathApi from '../../api/learningPathApi';
-import programApi from '../../api/programApi';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import learningPathApi from "../../api/learningPathApi";
+import programApi from "../../api/programApi";
+import courseApi from "../../api/courseApi";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
 import {
   COURSE_LEVELS,
   LEVEL_LABELS,
   DEFAULT_PROGRAMS,
-} from '../../utils/constants';
+} from "../../utils/constants";
 
 const LearningPathManagement = () => {
   const [paths, setPaths] = useState([]);
-  const [programs, setPrograms] = useState(DEFAULT_PROGRAMS);
+  const [courses, setCourses] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  useEffect(() => {
+    courseApi
+      .getCourses({ limit: 200 })
+      .then((res) => setCourses(res.data))
+      .catch((e) => toast.error(e.message));
+  }, []);
+  const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modal
@@ -33,11 +42,11 @@ const LearningPathManagement = () => {
   const [editingPath, setEditingPath] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    program_id: 1,
+    title: "",
+    program_id: "",
     level: COURSE_LEVELS.BEGINNER,
     estimated_duration: 90,
-    description: '',
+    description: "",
     is_published: 1,
   });
 
@@ -54,50 +63,18 @@ const LearningPathManagement = () => {
         programApi.getPrograms(),
       ]);
 
-      if (progRes.status === 'fulfilled') {
+      if (progRes.status === "fulfilled") {
         const pList = progRes.value?.data || progRes.value || [];
         if (Array.isArray(pList) && pList.length > 0) {
           setPrograms(pList);
         }
       }
 
-      if (pathRes.status === 'fulfilled') {
+      if (pathRes.status === "fulfilled") {
         const list = pathRes.value?.data || pathRes.value || [];
         setPaths(Array.isArray(list) ? list : list.learning_paths || []);
       } else {
-        // Fallback mock paths
-        setPaths([
-          {
-            id: 1,
-            title: 'Lộ trình Chinh phục IELTS 6.5 từ con số 0',
-            program_id: 4,
-            level: 'beginner',
-            estimated_duration: 180,
-            description: 'Lộ trình từ mất gốc ngữ pháp đến thành thạo 4 kỹ năng theo cấu trúc đề thi IELTS chuẩn IDP & BC.',
-            courses_count: 4,
-            is_published: 1,
-          },
-          {
-            id: 2,
-            title: 'Lộ trình Đạt Chuẩn CEFR B2 Cho Sinh Viên & Người Đi Làm',
-            program_id: 2,
-            level: 'intermediate',
-            estimated_duration: 120,
-            description: 'Chinh phục B2 Châu Âu với 1200 từ vựng cốt lõi và kỹ năng giao tiếp phản xạ tự nhiên.',
-            courses_count: 3,
-            is_published: 1,
-          },
-          {
-            id: 3,
-            title: 'Lộ trình Chuyên Anh & Học Sinh Giỏi Quốc Gia',
-            program_id: 7,
-            level: 'advanced',
-            estimated_duration: 240,
-            description: 'Nâng cao kỹ năng tư duy học thuật, viết luận Essay và kỹ năng đọc hiểu chuyên sâu.',
-            courses_count: 5,
-            is_published: 0,
-          },
-        ]);
+        setPaths([]);
       }
     } finally {
       setLoading(false);
@@ -110,12 +87,13 @@ const LearningPathManagement = () => {
 
   const handleOpenAdd = () => {
     setEditingPath(null);
+    setSelectedCourses([]);
     setFormData({
-      title: '',
-      program_id: programs[0]?.id || 1,
+      title: "",
+      program_id: programs[0]?.id || "",
       level: COURSE_LEVELS.BEGINNER,
       estimated_duration: 90,
-      description: '',
+      description: "",
       is_published: 1,
     });
     setModalOpen(true);
@@ -123,12 +101,13 @@ const LearningPathManagement = () => {
 
   const handleOpenEdit = (p) => {
     setEditingPath(p);
+    setSelectedCourses(p.course_ids || []);
     setFormData({
-      title: p.title || '',
-      program_id: p.program_id || programs[0]?.id || 1,
+      title: p.title || "",
+      program_id: p.program_id || programs[0]?.id || "",
       level: p.level || COURSE_LEVELS.BEGINNER,
       estimated_duration: p.estimated_duration || 90,
-      description: p.description || '',
+      description: p.description || "",
       is_published: p.is_published ? 1 : 0,
     });
     setModalOpen(true);
@@ -137,23 +116,29 @@ const LearningPathManagement = () => {
   const handleSavePath = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      toast.error('Vui lòng nhập tên lộ trình!');
+      toast.error("Vui lòng nhập tên lộ trình!");
       return;
     }
 
     setFormLoading(true);
     try {
       if (editingPath) {
-        await learningPathApi.updateLearningPath(editingPath.id, formData);
-        toast.success('Cập nhật lộ trình học thành công!');
+        await learningPathApi.updateLearningPath(editingPath.id, {
+          ...formData,
+          course_ids: selectedCourses,
+        });
+        toast.success("Cập nhật lộ trình học thành công!");
       } else {
-        await learningPathApi.createLearningPath(formData);
-        toast.success('Tạo lộ trình học mới thành công!');
+        await learningPathApi.createLearningPath({
+          ...formData,
+          course_ids: selectedCourses,
+        });
+        toast.success("Tạo lộ trình học mới thành công!");
       }
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu lộ trình');
+      toast.error(err.message || "Lỗi khi lưu lộ trình");
     } finally {
       setFormLoading(false);
     }
@@ -169,12 +154,12 @@ const LearningPathManagement = () => {
     setDeleteLoading(true);
     try {
       await learningPathApi.deleteLearningPath(pathToDelete.id);
-      toast.success('Xóa lộ trình thành công!');
+      toast.success("Xóa lộ trình thành công!");
       setDeleteConfirmOpen(false);
       setPathToDelete(null);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa lộ trình');
+      toast.error(err.message || "Lỗi khi xóa lộ trình");
     } finally {
       setDeleteLoading(false);
     }
@@ -189,7 +174,8 @@ const LearningPathManagement = () => {
             Quản Lý Lộ Trình Học Tập
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Xây dựng các chuỗi khóa học theo mục tiêu đầu ra giúp học viên có định hướng rõ ràng
+            Xây dựng các chuỗi khóa học theo mục tiêu đầu ra giúp học viên có
+            định hướng rõ ràng
           </p>
         </div>
 
@@ -212,7 +198,12 @@ const LearningPathManagement = () => {
             title="Chưa có lộ trình học nào"
             message="Tạo lộ trình học có định hướng để giúp học viên theo học hiệu quả hơn."
             action={
-              <Button variant="primary" size="sm" icon={HiPlus} onClick={handleOpenAdd}>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={HiPlus}
+                onClick={handleOpenAdd}
+              >
                 Tạo lộ trình ngay
               </Button>
             }
@@ -230,10 +221,14 @@ const LearningPathManagement = () => {
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <Badge variant="info" size="sm">
-                      {prog?.name || 'Chương trình đào tạo'}
+                      {prog?.name || "Chương trình đào tạo"}
                     </Badge>
-                    <Badge variant={p.is_published ? 'success' : 'gray'} dot size="sm">
-                      {p.is_published ? 'Công khai' : 'Bản nháp'}
+                    <Badge
+                      variant={p.is_published ? "success" : "gray"}
+                      dot
+                      size="sm"
+                    >
+                      {p.is_published ? "Công khai" : "Bản nháp"}
                     </Badge>
                   </div>
 
@@ -242,7 +237,7 @@ const LearningPathManagement = () => {
                   </h3>
 
                   <p className="mt-2 text-xs text-gray-500 line-clamp-3 leading-relaxed">
-                    {p.description || 'Chưa có phần giới thiệu chi tiết.'}
+                    {p.description || "Chưa có phần giới thiệu chi tiết."}
                   </p>
 
                   <div className="mt-4 flex items-center justify-between text-xs text-gray-500 bg-gray-50/80 p-3 rounded-xl border border-gray-100">
@@ -252,7 +247,7 @@ const LearningPathManagement = () => {
                     </span>
                     <span className="flex items-center gap-1.5 font-medium text-gray-700">
                       <HiBookOpen className="w-4 h-4 text-emerald-500" />
-                      {p.courses_count || 3} khóa học
+                      {p.course_count || 0} khóa học
                     </span>
                     <span className="capitalize text-blue-600 font-semibold">
                       {LEVEL_LABELS[p.level] || p.level}
@@ -288,7 +283,7 @@ const LearningPathManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingPath ? 'Chỉnh Sửa Lộ Trình' : 'Tạo Lộ Trình Mới'}
+        title={editingPath ? "Chỉnh Sửa Lộ Trình" : "Tạo Lộ Trình Mới"}
         size="md"
         footer={
           <>
@@ -305,16 +300,51 @@ const LearningPathManagement = () => {
               loading={formLoading}
               onClick={handleSavePath}
             >
-              {editingPath ? 'Lưu thay đổi' : 'Tạo lộ trình'}
+              {editingPath ? "Lưu thay đổi" : "Tạo lộ trình"}
             </Button>
           </>
         }
       >
         <form onSubmit={handleSavePath} className="space-y-4">
+          <fieldset className="rounded-xl border p-4">
+            <legend className="px-2 text-sm font-semibold">
+              Khóa học theo thứ tự ({selectedCourses.length})
+            </legend>
+            <p className="mb-3 text-xs text-slate-500">
+              Chọn khóa học theo thứ tự mong muốn. Bỏ chọn và chọn lại để đổi
+              thứ tự.
+            </p>
+            {courses.map((c) => (
+              <label
+                key={c.id}
+                className="flex items-center gap-2 py-2 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCourses.includes(c.id)}
+                  onChange={(e) =>
+                    setSelectedCourses(
+                      e.target.checked
+                        ? [...selectedCourses, c.id]
+                        : selectedCourses.filter((id) => id !== c.id),
+                    )
+                  }
+                />
+                {selectedCourses.includes(c.id) && (
+                  <span className="text-blue-700">
+                    {selectedCourses.indexOf(c.id) + 1}.
+                  </span>
+                )}
+                {c.title}
+              </label>
+            ))}
+          </fieldset>
           <Input
             label="Tiêu đề lộ trình học"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             placeholder="Ví dụ: Lộ trình Chinh phục IELTS 6.5 từ con số 0"
             required
           />
@@ -326,9 +356,15 @@ const LearningPathManagement = () => {
               </label>
               <select
                 value={formData.program_id}
-                onChange={(e) => setFormData({ ...formData, program_id: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    program_id: Number(e.target.value),
+                  })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
+                <option value="">Chưa phân loại</option>
                 {programs.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -343,12 +379,20 @@ const LearningPathManagement = () => {
               </label>
               <select
                 value={formData.level}
-                onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, level: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
-                <option value={COURSE_LEVELS.BEGINNER}>Cơ bản (Beginner)</option>
-                <option value={COURSE_LEVELS.INTERMEDIATE}>Trung cấp (Intermediate)</option>
-                <option value={COURSE_LEVELS.ADVANCED}>Nâng cao (Advanced)</option>
+                <option value={COURSE_LEVELS.BEGINNER}>
+                  Cơ bản (Beginner)
+                </option>
+                <option value={COURSE_LEVELS.INTERMEDIATE}>
+                  Trung cấp (Intermediate)
+                </option>
+                <option value={COURSE_LEVELS.ADVANCED}>
+                  Nâng cao (Advanced)
+                </option>
               </select>
             </div>
           </div>
@@ -357,7 +401,12 @@ const LearningPathManagement = () => {
             label="Thời gian hoàn thành ước tính (ngày)"
             type="number"
             value={formData.estimated_duration}
-            onChange={(e) => setFormData({ ...formData, estimated_duration: Number(e.target.value) })}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                estimated_duration: Number(e.target.value),
+              })
+            }
             required
           />
 
@@ -368,7 +417,9 @@ const LearningPathManagement = () => {
             <textarea
               rows={3}
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Mô tả mục tiêu, lộ trình qua từng giai đoạn..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
             />
@@ -380,7 +431,12 @@ const LearningPathManagement = () => {
             </label>
             <select
               value={formData.is_published}
-              onChange={(e) => setFormData({ ...formData, is_published: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  is_published: Number(e.target.value),
+                })
+              }
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
             >
               <option value={1}>Công khai cho học viên</option>

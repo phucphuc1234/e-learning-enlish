@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   HiBell,
   HiCheckCircle,
@@ -7,18 +7,18 @@ import {
   HiInformationCircle,
   HiAcademicCap,
   HiClipboardDocumentCheck,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import notificationApi from '../../api/notificationApi';
-import Button from '../../components/common/Button';
-import Badge from '../../components/common/Badge';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
-import { formatDate } from '../../utils/helpers';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import notificationApi from "../../api/notificationApi";
+import Button from "../../components/common/Button";
+import Badge from "../../components/common/Badge";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
+import { formatDate } from "../../utils/helpers";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, unread, read
+  const [filter, setFilter] = useState("all"); // all, unread, read
   const [loading, setLoading] = useState(true);
 
   const fetchNotifications = async () => {
@@ -29,33 +29,7 @@ const NotificationPage = () => {
       const notifs = Array.isArray(list) ? list : list.notifications || [];
       setNotifications(notifs);
     } catch {
-      // Fallback mock notifications
-      setNotifications([
-        {
-          id: 1,
-          title: 'Bài tập mới đã được giao',
-          message: 'Giáo viên vừa thêm bài tập "Luyện tập Nghe & Điền từ Section 1" cho bài học 1.',
-          type: 'assignment',
-          is_read: false,
-          created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-        },
-        {
-          id: 2,
-          title: 'Kết quả bài thi Mock Test',
-          message: 'Điểm bài thi thử IELTS Mock Test Listening của bạn là 8.5/9.0. Chúc mừng!',
-          type: 'result',
-          is_read: false,
-          created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-        },
-        {
-          id: 3,
-          title: 'Chào mừng bạn đến với Hệ thống E-Learning',
-          message: 'Khám phá các khóa học chuẩn CEFR B1, B2 và IELTS ngay trên thanh điều hướng.',
-          type: 'info',
-          is_read: true,
-          created_at: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
-        },
-      ]);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -69,13 +43,11 @@ const NotificationPage = () => {
     try {
       await notificationApi.markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
       );
-      toast.success('Đã đánh dấu đã đọc!');
-    } catch {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-      );
+      toast.success("Đã đánh dấu đã đọc!");
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -83,15 +55,15 @@ const NotificationPage = () => {
     try {
       await notificationApi.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-      toast.success('Đã đánh dấu tất cả thông báo là đã đọc!');
-    } catch {
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      toast.success("Đã đánh dấu tất cả thông báo là đã đọc!");
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
   const filteredList = notifications.filter((item) => {
-    if (filter === 'unread') return !item.is_read;
-    if (filter === 'read') return item.is_read;
+    if (filter === "unread") return !item.is_read;
+    if (filter === "read") return item.is_read;
     return true;
   });
 
@@ -99,12 +71,14 @@ const NotificationPage = () => {
 
   const getIconByType = (type) => {
     switch (type) {
-      case 'assignment':
+      case "assignment":
         return <HiAcademicCap className="w-5 h-5 text-blue-600" />;
-      case 'result':
-      case 'exam':
-        return <HiClipboardDocumentCheck className="w-5 h-5 text-emerald-600" />;
-      case 'warning':
+      case "result":
+      case "exam":
+        return (
+          <HiClipboardDocumentCheck className="w-5 h-5 text-emerald-600" />
+        );
+      case "warning":
         return <HiExclamationCircle className="w-5 h-5 text-amber-600" />;
       default:
         return <HiInformationCircle className="w-5 h-5 text-purple-600" />;
@@ -120,7 +94,8 @@ const NotificationPage = () => {
             Thông Báo Hệ Thống
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Cập nhật tức thời về lịch học, bài tập mới và kết quả đánh giá năng lực
+            Cập nhật tức thời về lịch học, bài tập mới và kết quả đánh giá năng
+            lực
           </p>
         </div>
 
@@ -140,11 +115,11 @@ const NotificationPage = () => {
       <div className="flex items-center gap-2 border-b border-gray-200 pb-3">
         <button
           type="button"
-          onClick={() => setFilter('all')}
+          onClick={() => setFilter("all")}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            filter === 'all'
-              ? 'bg-blue-50 text-blue-700'
-              : 'text-gray-600 hover:text-gray-900'
+            filter === "all"
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:text-gray-900"
           }`}
         >
           Tất cả ({notifications.length})
@@ -152,11 +127,11 @@ const NotificationPage = () => {
 
         <button
           type="button"
-          onClick={() => setFilter('unread')}
+          onClick={() => setFilter("unread")}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-            filter === 'unread'
-              ? 'bg-blue-50 text-blue-700'
-              : 'text-gray-600 hover:text-gray-900'
+            filter === "unread"
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:text-gray-900"
           }`}
         >
           Chưa đọc
@@ -169,11 +144,11 @@ const NotificationPage = () => {
 
         <button
           type="button"
-          onClick={() => setFilter('read')}
+          onClick={() => setFilter("read")}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-            filter === 'read'
-              ? 'bg-blue-50 text-blue-700'
-              : 'text-gray-600 hover:text-gray-900'
+            filter === "read"
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:text-gray-900"
           }`}
         >
           Đã đọc
@@ -188,9 +163,9 @@ const NotificationPage = () => {
           <EmptyState
             title="Không có thông báo nào"
             message={
-              filter === 'unread'
-                ? 'Bạn đã đọc toàn bộ thông báo!'
-                : 'Chưa có thông báo nào được gửi đến bạn.'
+              filter === "unread"
+                ? "Bạn đã đọc toàn bộ thông báo!"
+                : "Chưa có thông báo nào được gửi đến bạn."
             }
             icon={HiBell}
           />
@@ -203,8 +178,8 @@ const NotificationPage = () => {
               onClick={() => !item.is_read && handleMarkAsRead(item.id)}
               className={`p-4 rounded-2xl border transition-all flex items-start justify-between gap-4 cursor-pointer ${
                 !item.is_read
-                  ? 'bg-blue-50/40 border-blue-200 shadow-sm hover:bg-blue-50/70'
-                  : 'bg-white border-gray-200 hover:bg-gray-50/60'
+                  ? "bg-blue-50/40 border-blue-200 shadow-sm hover:bg-blue-50/70"
+                  : "bg-white border-gray-200 hover:bg-gray-50/60"
               }`}
             >
               <div className="flex items-start gap-3.5">
@@ -224,7 +199,7 @@ const NotificationPage = () => {
                     {item.message}
                   </p>
                   <span className="mt-2 text-[11px] text-gray-400 block font-mono">
-                    {formatDate(item.created_at, 'HH:mm dd/MM/yyyy')}
+                    {formatDate(item.created_at, "HH:mm dd/MM/yyyy")}
                   </span>
                 </div>
               </div>

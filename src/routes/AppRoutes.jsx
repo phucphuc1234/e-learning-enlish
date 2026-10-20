@@ -1,139 +1,165 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
-import { USER_ROLES } from '../utils/constants';
-
-// Layouts & Guards
-import AuthLayout from '../components/layout/AuthLayout';
-import MainLayout from '../components/layout/MainLayout';
-import PrivateRoute from './PrivateRoute';
-import RoleRoute from './RoleRoute';
-
-// Auth Pages
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
-
-// Admin Pages
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import UserManagement from '../pages/admin/UserManagement';
-import ProgramManagement from '../pages/admin/ProgramManagement';
-
-// Teacher Pages
-import TeacherDashboard from '../pages/teacher/TeacherDashboard';
-import CourseManagement from '../pages/teacher/CourseManagement';
-import LessonManagement from '../pages/teacher/LessonManagement';
-import ExerciseManagement from '../pages/teacher/ExerciseManagement';
-import ExamManagement from '../pages/teacher/ExamManagement';
-import StudentProgress from '../pages/teacher/StudentProgress';
-import LearningPathManagement from '../pages/teacher/LearningPathManagement';
-
-// Student Pages
-import StudentDashboard from '../pages/student/StudentDashboard';
-import CourseList from '../pages/student/CourseList';
-import CourseDetail from '../pages/student/CourseDetail';
-import LessonView from '../pages/student/LessonView';
-import ExercisePage from '../pages/student/ExercisePage';
-import ExamPage from '../pages/student/ExamPage';
-import MyProgress from '../pages/student/MyProgress';
-import LearningPathPage from '../pages/student/LearningPathPage';
-import NotificationPage from '../pages/student/NotificationPage';
-import ExerciseHistory from '../pages/student/ExerciseHistory';
-// Root redirect based on authenticated user's role
-const RootRedirect = () => {
-  const { user, isAuthenticated } = useAuth();
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  if (user?.role === USER_ROLES.ADMIN) {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-  if (user?.role === USER_ROLES.TEACHER) {
-    return <Navigate to="/teacher/dashboard" replace />;
-  }
-  return <Navigate to="/student/dashboard" replace />;
-};
-
-// 404 Not Found Component
-const NotFound = () => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6">
-    <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-2xl mb-4">
-      404
-    </div>
-    <h2 className="text-xl font-bold text-gray-900">Không tìm thấy trang</h2>
-    <p className="mt-2 text-xs text-gray-500 max-w-sm">
-      Đường dẫn bạn yêu cầu không tồn tại hoặc đã được chuyển sang địa chỉ mới.
-    </p>
-    <a
-      href="/"
-      className="mt-6 inline-flex items-center justify-center px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 shadow-sm"
-    >
-      Về trang chủ
-    </a>
-  </div>
+import { lazy, Suspense } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import AuthLayout from "../components/layout/AuthLayout";
+import MainLayout from "../components/layout/MainLayout";
+import PrivateRoute from "./PrivateRoute";
+import RoleRoute from "./RoleRoute";
+import Loading from "../components/common/Loading";
+const LandingPage = lazy(() => import("../pages/LandingPage"));
+const HelpPage = lazy(() => import("../pages/HelpPage"));
+const ProfilePage = lazy(() => import("../pages/ProfilePage"));
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
+const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
+const UserManagement = lazy(() => import("../pages/admin/UserManagement"));
+const ProgramManagement = lazy(
+  () => import("../pages/admin/ProgramManagement"),
 );
-
-const AppRoutes = () => {
+const TeacherDashboard = lazy(
+  () => import("../pages/teacher/TeacherDashboard"),
+);
+const CourseManagement = lazy(
+  () => import("../pages/teacher/CourseManagement"),
+);
+const LessonManagement = lazy(
+  () => import("../pages/teacher/LessonManagement"),
+);
+const ExerciseManagement = lazy(
+  () => import("../pages/teacher/ExerciseManagement"),
+);
+const ExamManagement = lazy(() => import("../pages/teacher/ExamManagement"));
+const StudentProgress = lazy(() => import("../pages/teacher/StudentProgress"));
+const LearningPathManagement = lazy(
+  () => import("../pages/teacher/LearningPathManagement"),
+);
+const Submissions = lazy(() => import("../pages/teacher/Submissions"));
+const StudentDashboard = lazy(
+  () => import("../pages/student/StudentDashboard"),
+);
+const CourseList = lazy(() => import("../pages/student/CourseList"));
+const CourseDetail = lazy(() => import("../pages/student/CourseDetail"));
+const LessonView = lazy(() => import("../pages/student/LessonView"));
+const ExercisePage = lazy(() => import("../pages/student/ExercisePage"));
+const ExamPage = lazy(() => import("../pages/student/ExamPage"));
+const MyProgress = lazy(() => import("../pages/student/MyProgress"));
+const LearningPathPage = lazy(
+  () => import("../pages/student/LearningPathPage"),
+);
+const NotificationPage = lazy(
+  () => import("../pages/student/NotificationPage"),
+);
+const ExerciseHistory = lazy(() => import("../pages/student/ExerciseHistory"));
+function Home() {
+  const { loading, isAuthenticated, user } = useAuth();
+  if (loading) return <Loading fullScreen />;
+  return isAuthenticated ? (
+    <Navigate replace to={`/${user.role}/dashboard`} />
+  ) : (
+    <LandingPage />
+  );
+}
+function AuthPage({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  return loading ? (
+    <Loading />
+  ) : isAuthenticated ? (
+    <Navigate replace to="/" />
+  ) : (
+    children
+  );
+}
+export default function AppRoutes() {
   return (
-    <Routes>
-      {/* Public / Auth routes */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Route>
-
-      {/* Protected routes */}
-      <Route element={<PrivateRoute />}>
-        <Route element={<MainLayout />}>
-          {/* Index Route */}
-          <Route path="/" element={<RootRedirect />} />
-
-          {/* Admin routes */}
-          <Route element={<RoleRoute allowedRoles={[USER_ROLES.ADMIN]} />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<UserManagement />} />
-            <Route path="/admin/programs" element={<ProgramManagement />} />
-          </Route>
-
-          {/* Teacher routes */}
-          <Route element={<RoleRoute allowedRoles={[USER_ROLES.TEACHER, USER_ROLES.ADMIN]} />}>
-            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-            <Route path="/teacher/courses" element={<CourseManagement />} />
-            <Route path="/teacher/lessons" element={<LessonManagement />} />
-            <Route path="/teacher/exercises" element={<ExerciseManagement />} />
-            <Route path="/teacher/exams" element={<ExamManagement />} />
-            <Route path="/teacher/progress" element={<StudentProgress />} />
-            <Route path="/teacher/learning-paths" element={<LearningPathManagement />} />
-          </Route>
-
-          {/* Student routes */}
-          <Route element={<RoleRoute allowedRoles={[USER_ROLES.STUDENT, USER_ROLES.TEACHER, USER_ROLES.ADMIN]} />}>
-            <Route path="/student/dashboard" element={<StudentDashboard />} />
-            <Route path="/student/courses" element={<CourseList />} />
-            <Route path="/student/course/:id" element={<CourseDetail />} />
-            <Route path="/student/lesson/:id" element={<LessonView />} />
-            <Route path="/student/exercise/:id" element={<ExercisePage />} />
-            <Route path="/student/exam/:id" element={<ExamPage />} />
-            <Route path="/student/progress" element={<MyProgress />} />
-            <Route path="/student/learning-paths" element={<LearningPathPage />} />
-            <Route path="/student/notifications" element={<NotificationPage />} />
+    <Suspense fallback={<Loading text="Đang tải trang…" />}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/help" element={<HelpPage />} />
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/login"
+            element={
+              <AuthPage>
+                <LoginPage />
+              </AuthPage>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <AuthPage>
+                <RegisterPage />
+              </AuthPage>
+            }
+          />
+        </Route>
+        <Route element={<PrivateRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/notifications" element={<NotificationPage />} />
+            <Route element={<RoleRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/programs" element={<ProgramManagement />} />
+            </Route>
+            <Route element={<RoleRoute allowedRoles={["teacher", "admin"]} />}>
+              <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+              <Route path="/teacher/courses" element={<CourseManagement />} />
+              <Route path="/teacher/lessons" element={<LessonManagement />} />
+              <Route
+                path="/teacher/exercises"
+                element={<ExerciseManagement />}
+              />
+              <Route path="/teacher/exams" element={<ExamManagement />} />
+              <Route path="/teacher/progress" element={<StudentProgress />} />
+              <Route
+                path="/teacher/learning-paths"
+                element={<LearningPathManagement />}
+              />
+              <Route path="/teacher/submissions" element={<Submissions />} />
+            </Route>
             <Route
-              path="/student/exercise-history"
-              element={<ExerciseHistory />}
+              element={
+                <RoleRoute allowedRoles={["student", "teacher", "admin"]} />
+              }
+            >
+              <Route path="/student/dashboard" element={<StudentDashboard />} />
+              <Route path="/student/courses" element={<CourseList />} />
+              <Route path="/student/course/:id" element={<CourseDetail />} />
+              <Route path="/student/lesson/:id" element={<LessonView />} />
+              <Route path="/student/exercise/:id" element={<ExercisePage />} />
+              <Route path="/student/exam/:id" element={<ExamPage />} />
+              <Route path="/student/progress" element={<MyProgress />} />
+              <Route
+                path="/student/learning-paths"
+                element={<LearningPathPage />}
+              />
+              <Route
+                path="/student/notifications"
+                element={<NotificationPage />}
+              />
+              <Route
+                path="/student/exercise-history"
+                element={<ExerciseHistory />}
+              />
+            </Route>
+            <Route
+              path="*"
+              element={
+                <div className="surface text-center">
+                  <h1 className="text-2xl font-bold">
+                    404 · Không tìm thấy trang
+                  </h1>
+                  <a className="mt-4 inline-block text-blue-700" href="/">
+                    Về trang chủ
+                  </a>
+                </div>
+              }
             />
           </Route>
-
-          {/* Profile fallback */}
-          <Route path="/profile" element={<MyProgress />} />
-
-          {/* 404 inside layout */}
-          <Route path="*" element={<NotFound />} />
         </Route>
-      </Route>
-
-      {/* Global Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate replace to="/" />} />
+      </Routes>
+    </Suspense>
   );
-};
-
-export default AppRoutes;
+}

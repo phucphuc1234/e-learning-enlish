@@ -1,23 +1,23 @@
-import React from 'react';
-import { HiMagnifyingGlass, HiXMark } from 'react-icons/hi2';
+import React from "react";
+import { HiMagnifyingGlass, HiXMark } from "react-icons/hi2";
 
 const SearchBar = ({
-  value = '',
+  value = "",
   onChange,
   onSearch,
-  placeholder = 'Tìm kiếm...',
-  className = '',
-  containerClassName = '',
+  placeholder = "Tìm kiếm...",
+  className = "",
+  containerClassName = "",
 }) => {
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && onSearch) {
+    if (e.key === "Enter" && onSearch) {
       onSearch(value);
     }
   };
 
   const handleClear = () => {
     if (onChange) {
-      onChange({ target: { value: '' } });
+      onChange({ target: { value: "" } });
     }
   };
 

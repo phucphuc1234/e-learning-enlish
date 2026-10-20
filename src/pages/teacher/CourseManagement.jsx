@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HiPlus,
   HiBookOpen,
@@ -8,46 +8,46 @@ import {
   HiDocumentText,
   HiClipboardDocumentCheck,
   HiPhoto,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import courseApi from '../../api/courseApi';
-import programApi from '../../api/programApi';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import SearchBar from '../../components/common/SearchBar';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
-import useAuth from '../../hooks/useAuth';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import courseApi from "../../api/courseApi";
+import programApi from "../../api/programApi";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import SearchBar from "../../components/common/SearchBar";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
+import useAuth from "../../hooks/useAuth";
 import {
   COURSE_LEVELS,
   LEVEL_LABELS,
   LEVEL_COLORS,
-} from '../../utils/constants';
-import { formatCurrency, slugify } from '../../utils/helpers';
+} from "../../utils/constants";
+import { formatCurrency, slugify } from "../../utils/helpers";
 
 const CourseManagement = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [programFilter, setProgramFilter] = useState('');
+  const [search, setSearch] = useState("");
+  const [programFilter, setProgramFilter] = useState("");
   const { user } = useAuth();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    program_id: 1,
+    title: "",
+    slug: "",
+    program_id: "",
     level: COURSE_LEVELS.BEGINNER,
-    description: '',
-    thumbnail: '',
+    description: "",
+    thumbnail: "",
     price: 0,
     is_free: 1,
     is_published: 1,
@@ -58,12 +58,11 @@ const CourseManagement = () => {
   const [courseToDelete, setCourseToDelete] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-
   const fetchData = async () => {
     if (!user?.id) return;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const [coursesRes, programsRes] = await Promise.all([
@@ -72,9 +71,7 @@ const CourseManagement = () => {
           limit: 100,
           search: search.trim() || undefined,
           program_id: programFilter || undefined,
-          teacher_id: user.role === 'teacher'
-            ? user.id
-            : undefined,
+          teacher_id: user.role === "teacher" ? user.id : undefined,
         }),
 
         programApi.getPrograms({
@@ -83,23 +80,20 @@ const CourseManagement = () => {
         }),
       ]);
 
-      if (!coursesRes?.success ||
-        !Array.isArray(coursesRes.data)) {
-        throw new Error('Dữ liệu khóa học không hợp lệ');
+      if (!coursesRes?.success || !Array.isArray(coursesRes.data)) {
+        throw new Error("Dữ liệu khóa học không hợp lệ");
       }
 
-      if (!programsRes?.success ||
-        !Array.isArray(programsRes.data)) {
-        throw new Error('Dữ liệu chương trình không hợp lệ');
+      if (!programsRes?.success || !Array.isArray(programsRes.data)) {
+        throw new Error("Dữ liệu chương trình không hợp lệ");
       }
 
       setCourses(coursesRes.data);
       setPrograms(programsRes.data);
-
     } catch (err) {
       setCourses([]);
       setPrograms([]);
-      setError(err.message || 'Không tải được dữ liệu từ server');
+      setError(err.message || "Không tải được dữ liệu từ server");
     } finally {
       setLoading(false);
     }
@@ -114,12 +108,12 @@ const CourseManagement = () => {
   const handleOpenAdd = () => {
     setEditingCourse(null);
     setFormData({
-      title: '',
-      slug: '',
-      program_id: programs[0]?.id || 1,
+      title: "",
+      slug: "",
+      program_id: programs[0]?.id || "",
       level: COURSE_LEVELS.BEGINNER,
-      description: '',
-      thumbnail: '',
+      description: "",
+      thumbnail: "",
       price: 0,
       is_free: 1,
       is_published: 1,
@@ -130,12 +124,12 @@ const CourseManagement = () => {
   const handleOpenEdit = (course) => {
     setEditingCourse(course);
     setFormData({
-      title: course.title || '',
-      slug: course.slug || '',
-      program_id: course.program_id || programs[0]?.id || 1,
+      title: course.title || "",
+      slug: course.slug || "",
+      program_id: course.program_id || programs[0]?.id || "",
       level: course.level || COURSE_LEVELS.BEGINNER,
-      description: course.description || '',
-      thumbnail: course.thumbnail || '',
+      description: course.description || "",
+      thumbnail: course.thumbnail || "",
       price: course.price || 0,
       is_free: course.is_free ? 1 : 0,
       is_published: course.is_published ? 1 : 0,
@@ -155,7 +149,7 @@ const CourseManagement = () => {
   const handleSaveCourse = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      toast.error('Vui lòng nhập tên khóa học!');
+      toast.error("Vui lòng nhập tên khóa học!");
       return;
     }
 
@@ -163,15 +157,15 @@ const CourseManagement = () => {
     try {
       if (editingCourse) {
         await courseApi.updateCourse(editingCourse.id, formData);
-        toast.success('Cập nhật khóa học thành công!');
+        toast.success("Cập nhật khóa học thành công!");
       } else {
         await courseApi.createCourse(formData);
-        toast.success('Tạo khóa học mới thành công!');
+        toast.success("Tạo khóa học mới thành công!");
       }
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu khóa học');
+      toast.error(err.message || "Lỗi khi lưu khóa học");
     } finally {
       setFormLoading(false);
     }
@@ -187,12 +181,12 @@ const CourseManagement = () => {
     setDeleteLoading(true);
     try {
       await courseApi.deleteCourse(courseToDelete.id);
-      toast.success('Xóa khóa học thành công!');
+      toast.success("Xóa khóa học thành công!");
       setDeleteConfirmOpen(false);
       setCourseToDelete(null);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa khóa học');
+      toast.error(err.message || "Lỗi khi xóa khóa học");
     } finally {
       setDeleteLoading(false);
     }
@@ -207,7 +201,8 @@ const CourseManagement = () => {
             Quản Lý Khóa Học
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Tạo mới, chỉnh sửa nội dung bài giảng và thiết lập bài thi cho từng khóa
+            Tạo mới, chỉnh sửa nội dung bài giảng và thiết lập bài thi cho từng
+            khóa
           </p>
         </div>
 
@@ -237,6 +232,7 @@ const CourseManagement = () => {
             className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
           >
             <option value="">Tất cả chương trình</option>
+            <option value="">Chưa phân loại</option>
             {programs.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -266,7 +262,12 @@ const CourseManagement = () => {
             title="Chưa có khóa học nào"
             message="Bắt đầu tạo khóa học đầu tiên của Thầy/Cô ngay hôm nay."
             action={
-              <Button variant="primary" size="sm" icon={HiPlus} onClick={handleOpenAdd}>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={HiPlus}
+                onClick={handleOpenAdd}
+              >
                 Tạo khóa học ngay
               </Button>
             }
@@ -293,23 +294,28 @@ const CourseManagement = () => {
                     <div className="flex flex-col items-center gap-2 opacity-80">
                       <HiBookOpen className="w-12 h-12" />
                       <span className="text-xs font-semibold tracking-wider uppercase">
-                        {program?.name || 'Khóa học tiếng Anh'}
+                        {program?.name || "Khóa học tiếng Anh"}
                       </span>
                     </div>
                   )}
 
                   <div className="absolute top-3 left-3 flex gap-2">
                     <span
-                      className={`text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm ${LEVEL_COLORS[course.level] || 'bg-white text-gray-800'
-                        }`}
+                      className={`text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm ${
+                        LEVEL_COLORS[course.level] || "bg-white text-gray-800"
+                      }`}
                     >
                       {LEVEL_LABELS[course.level] || course.level}
                     </span>
                   </div>
 
                   <div className="absolute top-3 right-3">
-                    <Badge variant={course.is_published ? 'success' : 'gray'} dot size="sm">
-                      {course.is_published ? 'Đang mở' : 'Bản nháp'}
+                    <Badge
+                      variant={course.is_published ? "success" : "gray"}
+                      dot
+                      size="sm"
+                    >
+                      {course.is_published ? "Đang mở" : "Bản nháp"}
                     </Badge>
                   </div>
                 </div>
@@ -321,7 +327,8 @@ const CourseManagement = () => {
                       {course.title}
                     </h3>
                     <p className="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                      {course.description || 'Chưa có phần giới thiệu chi tiết cho khóa học này.'}
+                      {course.description ||
+                        "Chưa có phần giới thiệu chi tiết cho khóa học này."}
                     </p>
                   </div>
 
@@ -329,11 +336,13 @@ const CourseManagement = () => {
                     <span className="text-gray-500">
                       <span className="font-semibold text-gray-800">
                         {course.total_lessons || 0}
-                      </span>{' '}
+                      </span>{" "}
                       bài học
                     </span>
                     <span className="font-bold text-blue-600">
-                      {course.is_free ? 'Miễn phí' : formatCurrency(course.price)}
+                      {course.is_free
+                        ? "Miễn phí"
+                        : formatCurrency(course.price)}
                     </span>
                   </div>
                 </div>
@@ -389,7 +398,7 @@ const CourseManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingCourse ? 'Chỉnh Sửa Khóa Học' : 'Tạo Khóa Học Mới'}
+        title={editingCourse ? "Chỉnh Sửa Khóa Học" : "Tạo Khóa Học Mới"}
         size="lg"
         footer={
           <>
@@ -406,7 +415,7 @@ const CourseManagement = () => {
               loading={formLoading}
               onClick={handleSaveCourse}
             >
-              {editingCourse ? 'Lưu cập nhật' : 'Tạo khóa học'}
+              {editingCourse ? "Lưu cập nhật" : "Tạo khóa học"}
             </Button>
           </>
         }
@@ -427,9 +436,15 @@ const CourseManagement = () => {
               </label>
               <select
                 value={formData.program_id}
-                onChange={(e) => setFormData({ ...formData, program_id: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    program_id: Number(e.target.value),
+                  })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
               >
+                <option value="">Chưa phân loại</option>
                 {programs.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -444,12 +459,20 @@ const CourseManagement = () => {
               </label>
               <select
                 value={formData.level}
-                onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, level: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
               >
-                <option value={COURSE_LEVELS.BEGINNER}>Cơ bản (Beginner)</option>
-                <option value={COURSE_LEVELS.INTERMEDIATE}>Trung cấp (Intermediate)</option>
-                <option value={COURSE_LEVELS.ADVANCED}>Nâng cao (Advanced)</option>
+                <option value={COURSE_LEVELS.BEGINNER}>
+                  Cơ bản (Beginner)
+                </option>
+                <option value={COURSE_LEVELS.INTERMEDIATE}>
+                  Trung cấp (Intermediate)
+                </option>
+                <option value={COURSE_LEVELS.ADVANCED}>
+                  Nâng cao (Advanced)
+                </option>
               </select>
             </div>
           </div>
@@ -457,7 +480,9 @@ const CourseManagement = () => {
           <Input
             label="Đường dẫn ảnh bìa (Thumbnail URL)"
             value={formData.thumbnail}
-            onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, thumbnail: e.target.value })
+            }
             placeholder="https://example.com/images/course.jpg"
             icon={HiPhoto}
           />
@@ -469,7 +494,9 @@ const CourseManagement = () => {
             <textarea
               rows={4}
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Giới thiệu nội dung bài học, kết quả đầu ra, yêu cầu đầu vào..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
             />
@@ -502,7 +529,9 @@ const CourseManagement = () => {
                 label="Học phí (VNĐ)"
                 type="number"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: Number(e.target.value) })
+                }
                 disabled={Boolean(formData.is_free)}
               />
             </div>
@@ -513,7 +542,12 @@ const CourseManagement = () => {
               </label>
               <select
                 value={formData.is_published}
-                onChange={(e) => setFormData({ ...formData, is_published: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    is_published: Number(e.target.value),
+                  })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
               >
                 <option value={1}>Xuất bản (Công khai)</option>

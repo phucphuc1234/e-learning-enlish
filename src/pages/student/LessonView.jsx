@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import ReactMarkdown from "react-markdown";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   HiCheckCircle,
   HiArrowLeft,
@@ -8,19 +9,20 @@ import {
   HiPencilSquare,
   HiSpeakerWave,
   HiVideoCamera,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import lessonApi from '../../api/lessonApi';
-import progressApi from '../../api/progressApi';
-import exerciseApi from '../../api/exerciseApi';
-import Button from '../../components/common/Button';
-import Badge from '../../components/common/Badge';
-import Loading from '../../components/common/Loading';
-import { formatDuration } from '../../utils/helpers';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import lessonApi from "../../api/lessonApi";
+import progressApi from "../../api/progressApi";
+import exerciseApi from "../../api/exerciseApi";
+import Button from "../../components/common/Button";
+import Badge from "../../components/common/Badge";
+import Loading from "../../components/common/Loading";
+import { formatDuration } from "../../utils/helpers";
 
 const LessonView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const openedAt = useRef(Date.now());
 
   const [lesson, setLesson] = useState(null);
   const [exercises, setExercises] = useState([]);
@@ -40,48 +42,20 @@ const LessonView = () => {
           progressApi.getProgress({ lesson_id: id }),
         ]);
 
-        if (lRes.status === 'fulfilled') {
+        if (lRes.status === "fulfilled") {
           setLesson(lRes.value?.data || lRes.value);
         } else {
-          // Fallback lesson mock
-          setLesson({
-            id: Number(id),
-            course_id: 1,
-            title: 'Bài 1: Tổng quan bài thi IELTS Listening Section 1 & Kỹ năng bắt số, tên riêng',
-            content: `
-### 1. Cấu trúc bài thi IELTS Listening Section 1
-Section 1 thường là một cuộc hội thoại sinh hoạt hàng ngày giữa hai người (đặt phòng khách sạn, đăng ký thành viên câu lạc bộ, hỏi thông tin du lịch).
-- **Số câu hỏi:** 10 câu
-- **Dạng bài chủ đạo:** Điền từ vào mẫu đơn (Form Completion) hoặc bảng biểu (Table Completion)
-- **Yêu cầu quan trọng:** Chú ý giới hạn số từ (ví dụ: NO MORE THAN TWO WORDS AND/OR A NUMBER).
-
-### 2. Các bẫy thường gặp (Common Distractors)
-Người nói thường đưa ra một thông tin ban đầu, sau đó sửa lại bằng các cụm từ như:
-- *"Oh sorry, actually it's..."*
-- *"Let me double-check that..."*
-- *"I used to live there, but now I moved to..."*
-
-### 3. Quy tắc đánh vần tên và phát âm số
-- Chú ý các cặp âm dễ nhầm: A - E - I, G - J, M - N, B - P.
-- Số nhà, số điện thoại thường được đọc ngắt theo cụm 3-4 chữ số. Số 0 thường đọc là "oh" hoặc "zero".
-            `,
-            video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-            audio_url: '',
-            duration: 35,
-            order_index: 1,
-          });
+          setLesson(null);
         }
 
-        if (exRes.status === 'fulfilled') {
+        if (exRes.status === "fulfilled") {
           const list = exRes.value?.data || exRes.value || [];
           setExercises(Array.isArray(list) ? list : list.exercises || []);
         } else {
-          setExercises([
-            { id: 1, title: 'Bài tập thực hành: Nghe & Điền thông tin Section 1', type: 'fill_blank' },
-          ]);
+          setExercises([]);
         }
 
-        if (progRes.status === 'fulfilled') {
+        if (progRes.status === "fulfilled") {
           const res = progRes.value?.data || progRes.value;
           setIsCompleted(Boolean(res?.is_completed));
         }
@@ -99,12 +73,12 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
       await progressApi.updateProgress({
         lesson_id: id,
         is_completed: true,
+        time_spent: Math.floor((Date.now() - openedAt.current) / 1000),
       });
       setIsCompleted(true);
-      toast.success('Tuyệt vời! Bạn đã hoàn thành bài học này.');
-    } catch {
-      setIsCompleted(true);
-      toast.success('Đã lưu tiến độ hoàn thành bài học!');
+      toast.success("Tuyệt vời! Bạn đã hoàn thành bài học này.");
+    } catch (error) {
+      toast.error(error.message || "Chưa lưu được tiến độ. Vui lòng thử lại.");
     } finally {
       setCompleteLoading(false);
     }
@@ -118,7 +92,10 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
     return (
       <div className="text-center py-12">
         <p className="text-sm text-gray-500">Bài học không tồn tại.</p>
-        <Link to="/student/dashboard" className="text-blue-600 hover:underline text-xs mt-2 inline-block">
+        <Link
+          to="/student/dashboard"
+          className="text-blue-600 hover:underline text-xs mt-2 inline-block"
+        >
           Về bàn học của tôi
         </Link>
       </div>
@@ -136,8 +113,8 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
           <HiArrowLeft className="w-3.5 h-3.5" /> Xem lại giáo trình khóa học
         </Link>
 
-        <Badge variant={isCompleted ? 'success' : 'primary'} dot size="sm">
-          {isCompleted ? 'Đã hoàn thành' : 'Đang học'}
+        <Badge variant={isCompleted ? "success" : "primary"} dot size="sm">
+          {isCompleted ? "Đã hoàn thành" : "Đang học"}
         </Badge>
       </div>
 
@@ -153,33 +130,31 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
         </div>
 
         <Button
-          variant={isCompleted ? 'outline' : 'success'}
+          variant={isCompleted ? "outline" : "success"}
           size="sm"
           icon={HiCheckCircle}
           loading={completeLoading}
           onClick={handleMarkCompleted}
+          disabled={isCompleted}
         >
-          {isCompleted ? 'Đã hoàn thành' : 'Đánh dấu đã học'}
+          {isCompleted ? "Đã hoàn thành" : "Đánh dấu đã học"}
         </Button>
       </div>
 
       {/* Video / Audio Player Section */}
       {lesson.video_url && (
         <div className="bg-black rounded-2xl overflow-hidden shadow-lg aspect-video w-full">
-          {lesson.video_url.includes('youtube') || lesson.video_url.includes('youtu.be') ? (
+          {lesson.video_url.includes("youtube") ||
+          lesson.video_url.includes("youtu.be") ? (
             <iframe
-              src={lesson.video_url.replace('watch?v=', 'embed/')}
+              src={lesson.video_url.replace("watch?v=", "embed/")}
               title={lesson.title}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           ) : (
-            <video
-              controls
-              className="w-full h-full"
-              src={lesson.video_url}
-            />
+            <video controls className="w-full h-full" src={lesson.video_url} />
           )}
         </div>
       )}
@@ -207,8 +182,10 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
           <HiBookOpen className="w-5 h-5 text-blue-600" /> Nội Dung Bài Giảng
         </h3>
 
-        <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-line text-xs sm:text-sm">
-          {lesson.content || 'Nội dung bài học đang được cập nhật thêm.'}
+        <div className="lesson-content max-w-none">
+          <ReactMarkdown components={{ h1: "h2", h2: "h3" }}>
+            {lesson.content || "Nội dung bài học đang được cập nhật thêm."}
+          </ReactMarkdown>
         </div>
       </div>
 
@@ -218,7 +195,8 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <HiPencilSquare className="w-5 h-5 text-blue-600" /> Bài Tập Củng Cố Kiến Thức
+                <HiPencilSquare className="w-5 h-5 text-blue-600" /> Bài Tập
+                Củng Cố Kiến Thức
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
                 Làm bài tập ngay để ghi nhớ từ vựng và cấu trúc ngữ pháp
@@ -237,7 +215,7 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
                     {ex.title}
                   </h4>
                   <span className="text-[11px] text-gray-400 capitalize">
-                    Dạng bài: {ex.type || 'Trắc nghiệm'}
+                    Dạng bài: {ex.type || "Trắc nghiệm"}
                   </span>
                 </div>
 
@@ -259,10 +237,10 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
           size="sm"
           icon={HiArrowLeft}
           onClick={() => {
-            const prevId = Number(id) - 1;
-            if (prevId > 0) navigate(`/student/lesson/${prevId}`);
+            if (lesson.previous_lesson_id)
+              navigate(`/student/lesson/${lesson.previous_lesson_id}`);
           }}
-          disabled={Number(id) <= 1}
+          disabled={!lesson.previous_lesson_id}
         >
           Bài trước
         </Button>
@@ -273,9 +251,10 @@ Người nói thường đưa ra một thông tin ban đầu, sau đó sửa l�
           icon={HiArrowRight}
           iconPosition="right"
           onClick={() => {
-            const nextId = Number(id) + 1;
-            navigate(`/student/lesson/${nextId}`);
+            if (lesson.next_lesson_id)
+              navigate(`/student/lesson/${lesson.next_lesson_id}`);
           }}
+          disabled={!lesson.next_lesson_id}
         >
           Bài tiếp theo
         </Button>

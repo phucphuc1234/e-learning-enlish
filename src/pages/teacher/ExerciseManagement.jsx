@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import courseApi from '../../api/courseApi';
-import useAuth from '../../hooks/useAuth';
-import { useSearchParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import courseApi from "../../api/courseApi";
+import useAuth from "../../hooks/useAuth";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   HiPlus,
   HiPencilSquare,
@@ -12,35 +12,35 @@ import {
   HiCheckCircle,
   HiXCircle,
   HiOutlineQuestionMarkCircle,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import exerciseApi from '../../api/exerciseApi';
-import questionApi from '../../api/questionApi';
-import lessonApi from '../../api/lessonApi';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import exerciseApi from "../../api/exerciseApi";
+import questionApi from "../../api/questionApi";
+import lessonApi from "../../api/lessonApi";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
 import {
   EXERCISE_TYPES,
   EXERCISE_TYPE_LABELS,
   DIFFICULTY_LABELS,
   QUESTION_TYPES,
-} from '../../utils/constants';
+} from "../../utils/constants";
 
 const ExerciseManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const lessonId = searchParams.get('lesson_id') || '';
+  const lessonId = searchParams.get("lesson_id") || "";
 
   const { user } = useAuth();
 
   const [courses, setCourses] = useState([]);
   const [courseLessons, setCourseLessons] = useState([]);
   const [selectedCourseId, setSelectedCourseId] = useState(
-    searchParams.get('course_id') || ''
+    searchParams.get("course_id") || "",
   );
 
   const [lesson, setLesson] = useState(null);
@@ -53,10 +53,10 @@ const ExerciseManagement = () => {
   const [editingExercise, setEditingExercise] = useState(null);
   const [exFormLoading, setExFormLoading] = useState(false);
   const [exFormData, setExFormData] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     type: EXERCISE_TYPES.MULTIPLE_CHOICE,
-    difficulty: 'medium',
+    difficulty: "medium",
     time_limit: 15,
     is_published: 1,
   });
@@ -67,24 +67,24 @@ const ExerciseManagement = () => {
   const [targetExerciseId, setTargetExerciseId] = useState(null);
   const [qFormLoading, setQFormLoading] = useState(false);
   const [qFormData, setQFormData] = useState({
-    content: '',
+    content: "",
     type: QUESTION_TYPES.MULTIPLE_CHOICE,
     points: 1,
-    explanation: '',
+    explanation: "",
+    correct_text: "",
     answers: [
-      { content: '', is_correct: true },
-      { content: '', is_correct: false },
-      { content: '', is_correct: false },
-      { content: '', is_correct: false },
+      { content: "", is_correct: true },
+      { content: "", is_correct: false },
+      { content: "", is_correct: false },
+      { content: "", is_correct: false },
     ],
   });
 
   // Delete dialog
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-  const [deleteType, setDeleteType] = useState('exercise'); // 'exercise' | 'question'
+  const [deleteType, setDeleteType] = useState("exercise"); // 'exercise' | 'question'
   const [deleteLoading, setDeleteLoading] = useState(false);
-
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -92,12 +92,11 @@ const ExerciseManagement = () => {
         const response = await courseApi.getCourses({
           page: 1,
           limit: 100,
-          teacher_id:
-            user?.role === 'teacher' ? user.id : undefined,
+          teacher_id: user?.role === "teacher" ? user.id : undefined,
         });
 
         if (!response?.success || !Array.isArray(response.data)) {
-          throw new Error('Không tải được danh sách khóa học');
+          throw new Error("Không tải được danh sách khóa học");
         }
 
         setCourses(response.data);
@@ -124,7 +123,7 @@ const ExerciseManagement = () => {
           setSelectedCourseId(String(response.data.course_id));
         }
       } catch (error) {
-        console.error('Không tải được bài học:', error);
+        console.error("Không tải được bài học:", error);
       }
     };
 
@@ -145,7 +144,7 @@ const ExerciseManagement = () => {
         });
 
         if (!response?.success || !Array.isArray(response.data)) {
-          throw new Error('Không tải được bài học');
+          throw new Error("Không tải được bài học");
         }
 
         setCourseLessons(response.data);
@@ -157,7 +156,6 @@ const ExerciseManagement = () => {
 
     loadLessons();
   }, [selectedCourseId]);
-
 
   const fetchData = async () => {
     if (!lessonId) {
@@ -185,20 +183,18 @@ const ExerciseManagement = () => {
         !exerciseRes?.success ||
         !Array.isArray(exerciseRes.data)
       ) {
-        throw new Error('Không tải được dữ liệu bài tập');
+        throw new Error("Không tải được dữ liệu bài tập");
       }
 
       const exercisesWithQuestions = await Promise.all(
         exerciseRes.data.map(async (exercise) => {
-          const questionRes =
-            await questionApi.getQuestionsByExercise(exercise.id);
+          const questionRes = await questionApi.getQuestionsByExercise(
+            exercise.id,
+          );
 
-          if (
-            !questionRes?.success ||
-            !Array.isArray(questionRes.data)
-          ) {
+          if (!questionRes?.success || !Array.isArray(questionRes.data)) {
             throw new Error(
-              `Không tải được câu hỏi của bài tập ${exercise.id}`
+              `Không tải được câu hỏi của bài tập ${exercise.id}`,
             );
           }
 
@@ -206,7 +202,7 @@ const ExerciseManagement = () => {
             ...exercise,
             questions: questionRes.data,
           };
-        })
+        }),
       );
 
       setLesson(lessonRes.data);
@@ -215,20 +211,17 @@ const ExerciseManagement = () => {
       setExpandedExerciseId((previous) =>
         exercisesWithQuestions.some((e) => e.id === previous)
           ? previous
-          : exercisesWithQuestions[0]?.id ?? null
+          : (exercisesWithQuestions[0]?.id ?? null),
       );
-
     } catch (err) {
-      console.error('Lỗi tải câu hỏi:', err);
+      console.error("Lỗi tải câu hỏi:", err);
       setLesson(null);
       setExercises([]);
-      toast.error(err.message || 'Không thể tải bài tập');
+      toast.error(err.message || "Không thể tải bài tập");
     } finally {
       setLoading(false);
     }
   };
-
-
 
   useEffect(() => {
     fetchData();
@@ -241,16 +234,16 @@ const ExerciseManagement = () => {
       !Number.isInteger(Number(lessonId)) ||
       Number(lessonId) <= 0
     ) {
-      toast.error('Vui lòng chọn bài học trước khi tạo bài tập!');
+      toast.error("Vui lòng chọn bài học trước khi tạo bài tập!");
       return;
     }
 
     setEditingExercise(null);
     setExFormData({
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       type: EXERCISE_TYPES.MULTIPLE_CHOICE,
-      difficulty: 'medium',
+      difficulty: "medium",
       time_limit: 15,
       is_published: 0,
     });
@@ -260,10 +253,10 @@ const ExerciseManagement = () => {
   const handleOpenEditExercise = (ex) => {
     setEditingExercise(ex);
     setExFormData({
-      title: ex.title || '',
-      description: ex.description || '',
+      title: ex.title || "",
+      description: ex.description || "",
       type: ex.type || EXERCISE_TYPES.MULTIPLE_CHOICE,
-      difficulty: ex.difficulty || 'medium',
+      difficulty: ex.difficulty || "medium",
       time_limit: ex.time_limit || 15,
       is_published: ex.is_published ? 1 : 0,
     });
@@ -273,7 +266,7 @@ const ExerciseManagement = () => {
   const handleSaveExercise = async (e) => {
     e.preventDefault();
     if (!exFormData.title.trim()) {
-      toast.error('Vui lòng nhập tên bài tập!');
+      toast.error("Vui lòng nhập tên bài tập!");
       return;
     }
 
@@ -284,19 +277,19 @@ const ExerciseManagement = () => {
           ...exFormData,
           lesson_id: lessonId,
         });
-        toast.success('Cập nhật bài tập thành công!');
+        toast.success("Cập nhật bài tập thành công!");
       } else {
         await exerciseApi.createExercise({
           ...exFormData,
           lesson_id: lessonId,
-          is_published: 0,
+          is_published: exFormData.is_published,
         });
-        toast.success('Thêm bài tập mới thành công!');
+        toast.success("Thêm bài tập mới thành công!");
       }
       setExerciseModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu bài tập');
+      toast.error(err.message || "Lỗi khi lưu bài tập");
     } finally {
       setExFormLoading(false);
     }
@@ -307,15 +300,16 @@ const ExerciseManagement = () => {
     setTargetExerciseId(exerciseId);
     setEditingQuestion(null);
     setQFormData({
-      content: '',
+      content: "",
       type: QUESTION_TYPES.MULTIPLE_CHOICE,
       points: 1,
-      explanation: '',
+      explanation: "",
+      correct_text: "",
       answers: [
-        { content: '', is_correct: true },
-        { content: '', is_correct: false },
-        { content: '', is_correct: false },
-        { content: '', is_correct: false },
+        { content: "", is_correct: true },
+        { content: "", is_correct: false },
+        { content: "", is_correct: false },
+        { content: "", is_correct: false },
       ],
     });
     setQuestionModalOpen(true);
@@ -325,21 +319,25 @@ const ExerciseManagement = () => {
     setTargetExerciseId(exerciseId);
     setEditingQuestion(q);
     setQFormData({
-      content: q.content || '',
+      content: q.content || "",
       type: q.type || QUESTION_TYPES.MULTIPLE_CHOICE,
       points: q.points || 1,
-      explanation: q.explanation || '',
-      answers: q.answers && q.answers.length > 0 ? q.answers : [
-        { content: '', is_correct: true },
-        { content: '', is_correct: false },
-      ],
+      explanation: q.explanation || "",
+      correct_text: q.correct_text || "",
+      answers:
+        q.answers && q.answers.length > 0
+          ? q.answers
+          : [
+              { content: "", is_correct: true },
+              { content: "", is_correct: false },
+            ],
     });
     setQuestionModalOpen(true);
   };
 
   const handleAnswerChange = (index, field, value) => {
     const updated = [...qFormData.answers];
-    if (field === 'is_correct') {
+    if (field === "is_correct") {
       // Single choice mode: uncheck others
       updated.forEach((a, i) => {
         a.is_correct = i === index;
@@ -353,13 +351,13 @@ const ExerciseManagement = () => {
   const handleAddAnswerRow = () => {
     setQFormData({
       ...qFormData,
-      answers: [...qFormData.answers, { content: '', is_correct: false }],
+      answers: [...qFormData.answers, { content: "", is_correct: false }],
     });
   };
 
   const handleRemoveAnswerRow = (index) => {
     if (qFormData.answers.length <= 2) {
-      toast.error('Bài tập cần tối thiểu 2 phương án lựa chọn!');
+      toast.error("Bài tập cần tối thiểu 2 phương án lựa chọn!");
       return;
     }
     const updated = qFormData.answers.filter((_, i) => i !== index);
@@ -369,27 +367,22 @@ const ExerciseManagement = () => {
   const handleSaveQuestion = async (e) => {
     e.preventDefault();
     if (!qFormData.content.trim()) {
-      toast.error('Vui lòng nhập nội dung câu hỏi!');
+      toast.error("Vui lòng nhập nội dung câu hỏi!");
       return;
     }
 
-    if (qFormData.type === 'multiple_choice') {
+    if (qFormData.type === "multiple_choice") {
       const answers = qFormData.answers || [];
 
-      if (
-        answers.length < 2 ||
-        answers.some((a) => !a.content?.trim())
-      ) {
-        toast.error('Cần ít nhất 2 đáp án và không được để trống!');
+      if (answers.length < 2 || answers.some((a) => !a.content?.trim())) {
+        toast.error("Cần ít nhất 2 đáp án và không được để trống!");
         return;
       }
 
-      const correctCount = answers.filter(
-        (a) => a.is_correct
-      ).length;
+      const correctCount = answers.filter((a) => a.is_correct).length;
 
       if (correctCount !== 1) {
-        toast.error('Phải chọn đúng 1 đáp án!');
+        toast.error("Phải chọn đúng 1 đáp án!");
         return;
       }
     }
@@ -398,7 +391,7 @@ const ExerciseManagement = () => {
       !Number.isFinite(Number(qFormData.points)) ||
       Number(qFormData.points) <= 0
     ) {
-      toast.error('Điểm phải lớn hơn 0!');
+      toast.error("Điểm phải lớn hơn 0!");
       return;
     }
 
@@ -409,18 +402,18 @@ const ExerciseManagement = () => {
           exercise_id: targetExerciseId,
           ...qFormData,
         });
-        toast.success('Cập nhật câu hỏi thành công!');
+        toast.success("Cập nhật câu hỏi thành công!");
       } else {
         await questionApi.createQuestion({
           exercise_id: targetExerciseId,
           ...qFormData,
         });
-        toast.success('Thêm câu hỏi mới thành công!');
+        toast.success("Thêm câu hỏi mới thành công!");
       }
       setQuestionModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu câu hỏi');
+      toast.error(err.message || "Lỗi khi lưu câu hỏi");
     } finally {
       setQFormLoading(false);
     }
@@ -429,13 +422,13 @@ const ExerciseManagement = () => {
   // Delete Action
   const handleDeleteExercise = (ex) => {
     setItemToDelete(ex);
-    setDeleteType('exercise');
+    setDeleteType("exercise");
     setDeleteConfirmOpen(true);
   };
 
   const handleDeleteQuestion = (q) => {
     setItemToDelete(q);
-    setDeleteType('question');
+    setDeleteType("question");
     setDeleteConfirmOpen(true);
   };
 
@@ -443,18 +436,18 @@ const ExerciseManagement = () => {
     if (!itemToDelete) return;
     setDeleteLoading(true);
     try {
-      if (deleteType === 'exercise') {
+      if (deleteType === "exercise") {
         await exerciseApi.deleteExercise(itemToDelete.id);
-        toast.success('Xóa bài tập thành công!');
+        toast.success("Xóa bài tập thành công!");
       } else {
         await questionApi.deleteQuestion(itemToDelete.id);
-        toast.success('Xóa câu hỏi thành công!');
+        toast.success("Xóa câu hỏi thành công!");
       }
       setDeleteConfirmOpen(false);
       setItemToDelete(null);
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa');
+      toast.error(err.message || "Lỗi khi xóa");
     } finally {
       setDeleteLoading(false);
     }
@@ -462,18 +455,14 @@ const ExerciseManagement = () => {
 
   return (
     <div className="space-y-6">
-
       <div className="bg-white rounded-xl border p-5">
         <h2 className="font-semibold text-gray-800 mb-4">
           Chọn khóa học và bài học
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Khóa học
-            </label>
+            <label className="block text-sm font-medium mb-2">Khóa học</label>
 
             <select
               value={selectedCourseId}
@@ -500,9 +489,7 @@ const ExerciseManagement = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Bài học
-            </label>
+            <label className="block text-sm font-medium mb-2">Bài học</label>
 
             <select
               value={lessonId}
@@ -513,10 +500,10 @@ const ExerciseManagement = () => {
                 setSearchParams(
                   id
                     ? {
-                      course_id: selectedCourseId,
-                      lesson_id: id,
-                    }
-                    : { course_id: selectedCourseId }
+                        course_id: selectedCourseId,
+                        lesson_id: id,
+                      }
+                    : { course_id: selectedCourseId },
                 );
               }}
               className="w-full border rounded-lg p-3 disabled:bg-gray-100"
@@ -545,7 +532,7 @@ const ExerciseManagement = () => {
             </Link>
             <span className="text-gray-400">/</span>
             <span className="text-xs text-gray-500 truncate max-w-sm">
-              {lesson?.title || 'Bài tập thực hành'}
+              {lesson?.title || "Bài tập thực hành"}
             </span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
@@ -622,19 +609,22 @@ const ExerciseManagement = () => {
                         </Badge>
                         <Badge
                           variant={
-                            exercise.difficulty === 'easy'
-                              ? 'success'
-                              : exercise.difficulty === 'hard'
-                                ? 'danger'
-                                : 'warning'
+                            exercise.difficulty === "easy"
+                              ? "success"
+                              : exercise.difficulty === "hard"
+                                ? "danger"
+                                : "warning"
                           }
                           size="sm"
                         >
-                          {DIFFICULTY_LABELS[exercise.difficulty] || exercise.difficulty}
+                          {DIFFICULTY_LABELS[exercise.difficulty] ||
+                            exercise.difficulty}
                         </Badge>
                         <span className="text-[11px] text-gray-400">•</span>
                         <span className="text-[11px] text-gray-500">
-                          {exercise.time_limit ? `${exercise.time_limit} phút` : 'Không giới hạn'}
+                          {exercise.time_limit
+                            ? `${exercise.time_limit} phút`
+                            : "Không giới hạn"}
                         </span>
                         <span className="text-[11px] text-gray-400">•</span>
                         <span className="text-[11px] font-medium text-blue-600">
@@ -680,7 +670,7 @@ const ExerciseManagement = () => {
                   <div className="border-t border-gray-100 bg-gray-50/40 p-5 space-y-3">
                     {qList.length === 0 ? (
                       <div className="text-center py-6 text-xs text-gray-400">
-                        Chưa có câu hỏi nào trong bài tập này.{' '}
+                        Chưa có câu hỏi nào trong bài tập này.{" "}
                         <button
                           type="button"
                           onClick={() => handleOpenAddQuestion(exercise.id)}
@@ -713,7 +703,9 @@ const ExerciseManagement = () => {
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
-                                onClick={() => handleOpenEditQuestion(exercise.id, q)}
+                                onClick={() =>
+                                  handleOpenEditQuestion(exercise.id, q)
+                                }
                                 className="p-1.5 text-gray-400 hover:text-blue-600 rounded"
                                 title="Sửa câu hỏi"
                               >
@@ -736,10 +728,11 @@ const ExerciseManagement = () => {
                               {q.answers.map((ans, aIdx) => (
                                 <div
                                   key={ans.id || aIdx}
-                                  className={`p-2 rounded-lg border flex items-center gap-2 ${ans.is_correct
-                                    ? 'border-emerald-300 bg-emerald-50/50 text-emerald-800 font-medium'
-                                    : 'border-gray-200 bg-white text-gray-600'
-                                    }`}
+                                  className={`p-2 rounded-lg border flex items-center gap-2 ${
+                                    ans.is_correct
+                                      ? "border-emerald-300 bg-emerald-50/50 text-emerald-800 font-medium"
+                                      : "border-gray-200 bg-white text-gray-600"
+                                  }`}
                                 >
                                   {ans.is_correct ? (
                                     <HiCheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
@@ -775,7 +768,7 @@ const ExerciseManagement = () => {
       <Modal
         isOpen={exerciseModalOpen}
         onClose={() => setExerciseModalOpen(false)}
-        title={editingExercise ? 'Chỉnh Sửa Bộ Bài Tập' : 'Tạo Bộ Bài Tập Mới'}
+        title={editingExercise ? "Chỉnh Sửa Bộ Bài Tập" : "Tạo Bộ Bài Tập Mới"}
         size="md"
         footer={
           <>
@@ -792,7 +785,7 @@ const ExerciseManagement = () => {
               loading={exFormLoading}
               onClick={handleSaveExercise}
             >
-              {editingExercise ? 'Lưu thay đổi' : 'Tạo bài tập'}
+              {editingExercise ? "Lưu thay đổi" : "Tạo bài tập"}
             </Button>
           </>
         }
@@ -801,7 +794,9 @@ const ExerciseManagement = () => {
           <Input
             label="Tiêu đề bài tập"
             value={exFormData.title}
-            onChange={(e) => setExFormData({ ...exFormData, title: e.target.value })}
+            onChange={(e) =>
+              setExFormData({ ...exFormData, title: e.target.value })
+            }
             placeholder="Ví dụ: Luyện tập Nghe & Điền từ Section 1"
             required
           />
@@ -813,10 +808,14 @@ const ExerciseManagement = () => {
               </label>
               <select
                 value={exFormData.type}
-                onChange={(e) => setExFormData({ ...exFormData, type: e.target.value })}
+                onChange={(e) =>
+                  setExFormData({ ...exFormData, type: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
-                <option value={EXERCISE_TYPES.MULTIPLE_CHOICE}>Trắc nghiệm</option>
+                <option value={EXERCISE_TYPES.MULTIPLE_CHOICE}>
+                  Trắc nghiệm
+                </option>
                 <option value={EXERCISE_TYPES.FILL_BLANK}>Điền từ</option>
                 <option value={EXERCISE_TYPES.LISTENING}>Nghe hiểu</option>
                 <option value={EXERCISE_TYPES.READING}>Đọc hiểu</option>
@@ -831,7 +830,9 @@ const ExerciseManagement = () => {
               </label>
               <select
                 value={exFormData.difficulty}
-                onChange={(e) => setExFormData({ ...exFormData, difficulty: e.target.value })}
+                onChange={(e) =>
+                  setExFormData({ ...exFormData, difficulty: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
                 <option value="easy">Dễ (Easy)</option>
@@ -841,11 +842,29 @@ const ExerciseManagement = () => {
             </div>
           </div>
 
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={!!exFormData.is_published}
+              onChange={(e) =>
+                setExFormData({
+                  ...exFormData,
+                  is_published: e.target.checked ? 1 : 0,
+                })
+              }
+            />
+            Xuất bản bài tập
+          </label>
           <Input
             label="Thời gian làm bài (phút, 0 = không giới hạn)"
             type="number"
             value={exFormData.time_limit}
-            onChange={(e) => setExFormData({ ...exFormData, time_limit: Number(e.target.value) })}
+            onChange={(e) =>
+              setExFormData({
+                ...exFormData,
+                time_limit: Number(e.target.value),
+              })
+            }
           />
 
           <div>
@@ -855,7 +874,9 @@ const ExerciseManagement = () => {
             <textarea
               rows={3}
               value={exFormData.description}
-              onChange={(e) => setExFormData({ ...exFormData, description: e.target.value })}
+              onChange={(e) =>
+                setExFormData({ ...exFormData, description: e.target.value })
+              }
               placeholder="Nhập hướng dẫn làm bài cho học viên..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
             />
@@ -867,7 +888,7 @@ const ExerciseManagement = () => {
       <Modal
         isOpen={questionModalOpen}
         onClose={() => setQuestionModalOpen(false)}
-        title={editingQuestion ? 'Chỉnh Sửa Câu Hỏi' : 'Thêm Câu Hỏi Mới'}
+        title={editingQuestion ? "Chỉnh Sửa Câu Hỏi" : "Thêm Câu Hỏi Mới"}
         size="lg"
         footer={
           <>
@@ -884,7 +905,7 @@ const ExerciseManagement = () => {
               loading={qFormLoading}
               onClick={handleSaveQuestion}
             >
-              {editingQuestion ? 'Lưu thay đổi' : 'Thêm câu hỏi'}
+              {editingQuestion ? "Lưu thay đổi" : "Thêm câu hỏi"}
             </Button>
           </>
         }
@@ -893,7 +914,9 @@ const ExerciseManagement = () => {
           <Input
             label="Nội dung câu hỏi"
             value={qFormData.content}
-            onChange={(e) => setQFormData({ ...qFormData, content: e.target.value })}
+            onChange={(e) =>
+              setQFormData({ ...qFormData, content: e.target.value })
+            }
             placeholder="Nhập câu hỏi hoặc câu văn có chỗ trống..."
             required
           />
@@ -903,7 +926,9 @@ const ExerciseManagement = () => {
               label="Điểm số cho câu này"
               type="number"
               value={qFormData.points}
-              onChange={(e) => setQFormData({ ...qFormData, points: Number(e.target.value) })}
+              onChange={(e) =>
+                setQFormData({ ...qFormData, points: Number(e.target.value) })
+              }
               required
             />
             <div>
@@ -912,18 +937,35 @@ const ExerciseManagement = () => {
               </label>
               <select
                 value={qFormData.type}
-                onChange={(e) => setQFormData({ ...qFormData, type: e.target.value })}
+                onChange={(e) =>
+                  setQFormData({ ...qFormData, type: e.target.value })
+                }
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
               >
                 <option value="multiple_choice">Trắc nghiệm chọn đáp án</option>
                 <option value="fill_blank">Điền từ chính xác</option>
                 <option value="true_false">Đúng / Sai</option>
+                <option value="essay">Tự luận</option>
+                <option value="speaking">Luyện nói (nộp bản ghi/link)</option>
+                <option value="matching">Nối cặp (nhập các cặp)</option>
+                <option value="ordering">Sắp xếp câu</option>
               </select>
             </div>
           </div>
 
+          {["fill_blank", "matching", "ordering"].includes(qFormData.type) && (
+            <Input
+              label="Đáp án mẫu (các phương án chấp nhận cách nhau bằng |)"
+              value={qFormData.correct_text || ""}
+              onChange={(e) =>
+                setQFormData({ ...qFormData, correct_text: e.target.value })
+              }
+            />
+          )}
           {/* Answers list */}
-          <div>
+          <div
+            hidden={!["multiple_choice", "true_false"].includes(qFormData.type)}
+          >
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-semibold text-gray-800">
                 Các phương án lựa chọn & đáp án đúng:
@@ -944,17 +986,21 @@ const ExerciseManagement = () => {
                     type="radio"
                     name="correct_answer"
                     checked={ans.is_correct}
-                    onChange={() => handleAnswerChange(idx, 'is_correct', true)}
+                    onChange={() => handleAnswerChange(idx, "is_correct", true)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                     title="Chọn làm đáp án đúng"
                   />
                   <input
                     type="text"
                     value={ans.content}
-                    onChange={(e) => handleAnswerChange(idx, 'content', e.target.value)}
+                    onChange={(e) =>
+                      handleAnswerChange(idx, "content", e.target.value)
+                    }
                     placeholder={`Phương án ${String.fromCharCode(65 + idx)}`}
                     className="flex-1 px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    required
+                    required={["multiple_choice", "true_false"].includes(
+                      qFormData.type,
+                    )}
                   />
                   <button
                     type="button"
@@ -976,7 +1022,9 @@ const ExerciseManagement = () => {
             <textarea
               rows={2}
               value={qFormData.explanation}
-              onChange={(e) => setQFormData({ ...qFormData, explanation: e.target.value })}
+              onChange={(e) =>
+                setQFormData({ ...qFormData, explanation: e.target.value })
+              }
               placeholder="Giải thích vì sao đáp án này đúng để học viên tự học..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg text-gray-700"
             />
@@ -990,9 +1038,12 @@ const ExerciseManagement = () => {
         onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
         loading={deleteLoading}
-        title={deleteType === 'exercise' ? 'Xóa bài tập' : 'Xóa câu hỏi'}
-        message={`Bạn có chắc chắn muốn xóa ${deleteType === 'exercise' ? `bài tập "${itemToDelete?.title}"` : 'câu hỏi này'
-          }?`}
+        title={deleteType === "exercise" ? "Xóa bài tập" : "Xóa câu hỏi"}
+        message={`Bạn có chắc chắn muốn xóa ${
+          deleteType === "exercise"
+            ? `bài tập "${itemToDelete?.title}"`
+            : "câu hỏi này"
+        }?`}
         confirmText="Xóa vĩnh viễn"
       />
     </div>

@@ -1,13 +1,15 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
-import { USER_ROLES } from '../utils/constants';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import { USER_ROLES } from "../utils/constants";
 
 const RoleRoute = ({ allowedRoles = [], children }) => {
   const { user } = useAuth();
   const role = user?.role;
 
-  const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+  const rolesArray = Array.isArray(allowedRoles)
+    ? allowedRoles
+    : [allowedRoles];
 
   if (!role || !rolesArray.includes(role)) {
     // Redirect to respective default page

@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: '/api',
+  baseURL: "/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   timeout: 30000,
 });
@@ -11,7 +11,7 @@ const axiosClient = axios.create({
 // Request interceptor
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -19,7 +19,7 @@ axiosClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor
@@ -31,27 +31,32 @@ axiosClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       // 401 Unauthorized - token expired or invalid
-      if (error.response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+      if (
+        error.response.status === 401 &&
+        error.config?.headers?.Authorization
+      ) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         // If not already on login page, redirect
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
         }
       }
 
       const errorMessage =
         error.response.data?.message ||
         error.response.data?.error ||
-        'Có lỗi xảy ra từ máy chủ';
+        "Có lỗi xảy ra từ máy chủ";
 
       return Promise.reject(new Error(errorMessage));
     } else if (error.request) {
-      return Promise.reject(new Error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng!'));
+      return Promise.reject(
+        new Error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng!"),
+      );
     } else {
-      return Promise.reject(new Error(error.message || 'Lỗi không xác định'));
+      return Promise.reject(new Error(error.message || "Lỗi không xác định"));
     }
-  }
+  },
 );
 
 export default axiosClient;

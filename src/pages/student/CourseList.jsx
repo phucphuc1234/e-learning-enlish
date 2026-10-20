@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   HiBookOpen,
   HiClock,
   HiAcademicCap,
   HiArrowRight,
   HiCheckBadge,
-} from 'react-icons/hi2';
-import courseApi from '../../api/courseApi';
-import programApi from '../../api/programApi';
-import SearchBar from '../../components/common/SearchBar';
-import Badge from '../../components/common/Badge';
-import Button from '../../components/common/Button';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
+} from "react-icons/hi2";
+import courseApi from "../../api/courseApi";
+import programApi from "../../api/programApi";
+import SearchBar from "../../components/common/SearchBar";
+import Badge from "../../components/common/Badge";
+import Button from "../../components/common/Button";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
 import {
   DEFAULT_PROGRAMS,
   LEVEL_LABELS,
   LEVEL_COLORS,
-} from '../../utils/constants';
-import { formatCurrency, formatDuration } from '../../utils/helpers';
+} from "../../utils/constants";
+import { formatCurrency, formatDuration } from "../../utils/helpers";
 
 const CourseList = () => {
   const [courses, setCourses] = useState([]);
-  const [programs, setPrograms] = useState(DEFAULT_PROGRAMS);
+  const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [search, setSearch] = useState('');
-  const [selectedProgram, setSelectedProgram] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('');
-  const [priceType, setPriceType] = useState('all'); // all, free, paid
+  const [search, setSearch] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("");
+  const [priceType, setPriceType] = useState("all"); // all, free, paid
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,81 +45,19 @@ const CourseList = () => {
           programApi.getPrograms(),
         ]);
 
-        if (pRes.status === 'fulfilled') {
+        if (pRes.status === "fulfilled") {
           const pList = pRes.value?.data || pRes.value || [];
           if (Array.isArray(pList) && pList.length > 0) {
             setPrograms(pList);
           }
         }
 
-        if (cRes.status === 'fulfilled') {
+        if (cRes.status === "fulfilled") {
           const list = cRes.value?.data || cRes.value || [];
           const cList = Array.isArray(list) ? list : list.courses || [];
           setCourses(cList);
         } else {
-          // Fallback sample courses
-          setCourses([
-            {
-              id: 1,
-              title: 'Luyện thi IELTS 6.5 - Listening & Speaking Bứt Phá',
-              program_id: 4,
-              level: 'intermediate',
-              description: 'Chiến thuật làm bài nghe Part 1-4, phương pháp phát âm chuẩn IPA và trả lời lưu loát Speaking Part 2.',
-              thumbnail: '',
-              total_lessons: 24,
-              total_duration: 720,
-              price: 500000,
-              is_free: 0,
-              is_published: 1,
-              rating: 4.9,
-              enrolled_count: 320,
-            },
-            {
-              id: 2,
-              title: 'Ngữ pháp & Từ vựng CEFR B2 Trọng tâm Toàn diện',
-              program_id: 2,
-              level: 'intermediate',
-              description: 'Nắm vững 100% ngữ pháp tiếng Anh trung cấp và 1000 từ vựng cốt lõi chuẩn khung tham chiếu Châu Âu.',
-              thumbnail: '',
-              total_lessons: 18,
-              total_duration: 540,
-              price: 0,
-              is_free: 1,
-              is_published: 1,
-              rating: 4.8,
-              enrolled_count: 580,
-            },
-            {
-              id: 3,
-              title: 'Chiến thuật Luyện thi Vào Lớp 10 Chuyên Anh',
-              program_id: 7,
-              level: 'advanced',
-              description: 'Luyện đề thi thử tuyển sinh trường Chuyên, giải đề trắc nghiệm và hoàn thành đoạn văn khó.',
-              thumbnail: '',
-              total_lessons: 30,
-              total_duration: 900,
-              price: 650000,
-              is_free: 0,
-              is_published: 1,
-              rating: 5.0,
-              enrolled_count: 145,
-            },
-            {
-              id: 4,
-              title: 'Tiếng Anh Giao Tiếp Thực Chiến Cho Người Mất Gốc',
-              program_id: 11,
-              level: 'beginner',
-              description: 'Bắt đầu từ con số 0 với phương pháp phản xạ âm và các tình huống giao tiếp đời sống hàng ngày.',
-              thumbnail: '',
-              total_lessons: 20,
-              total_duration: 600,
-              price: 0,
-              is_free: 1,
-              is_published: 1,
-              rating: 4.7,
-              enrolled_count: 890,
-            },
-          ]);
+          setCourses([]);
         }
       } finally {
         setLoading(false);
@@ -131,8 +69,8 @@ const CourseList = () => {
 
   // Client filter for price
   const filteredCourses = courses.filter((c) => {
-    if (priceType === 'free') return Boolean(c.is_free);
-    if (priceType === 'paid') return !c.is_free;
+    if (priceType === "free") return Boolean(c.is_free);
+    if (priceType === "paid") return !c.is_free;
     return true;
   });
 
@@ -144,7 +82,7 @@ const CourseList = () => {
           Khám Phá Khóa Học Tiếng Anh
         </h1>
         <p className="text-xs text-gray-500 mt-1">
-          Hệ thống các khóa học được thiết kế chuẩn quốc tế theo chuẩn CEFR, IELTS và chương trình giáo dục phổ thông
+          Tìm khóa học phù hợp với trình độ và mục tiêu của bạn.
         </p>
       </div>
 
@@ -199,11 +137,11 @@ const CourseList = () => {
         <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-gray-100 scrollbar-none">
           <button
             type="button"
-            onClick={() => setSelectedProgram('')}
+            onClick={() => setSelectedProgram("")}
             className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
               !selectedProgram
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             Tất cả
@@ -215,8 +153,8 @@ const CourseList = () => {
               onClick={() => setSelectedProgram(String(prog.id))}
               className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
                 String(selectedProgram) === String(prog.id)
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {prog.name}
@@ -238,10 +176,10 @@ const CourseList = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearch('');
-                  setSelectedProgram('');
-                  setSelectedLevel('');
-                  setPriceType('all');
+                  setSearch("");
+                  setSelectedProgram("");
+                  setSelectedLevel("");
+                  setPriceType("all");
                 }}
               >
                 Đặt lại bộ lọc
@@ -270,7 +208,7 @@ const CourseList = () => {
                     <div className="text-center p-4">
                       <HiAcademicCap className="w-12 h-12 mx-auto opacity-80 mb-1" />
                       <span className="text-xs font-bold tracking-wider uppercase opacity-90">
-                        {prog?.name || 'Chuẩn Quốc Tế'}
+                        {prog?.name || "Chuẩn Quốc Tế"}
                       </span>
                     </div>
                   )}
@@ -278,7 +216,7 @@ const CourseList = () => {
                   <div className="absolute top-3 left-3">
                     <span
                       className={`text-[10px] px-2.5 py-1 rounded-full font-bold shadow-sm ${
-                        LEVEL_COLORS[course.level] || 'bg-white text-gray-800'
+                        LEVEL_COLORS[course.level] || "bg-white text-gray-800"
                       }`}
                     >
                       {LEVEL_LABELS[course.level] || course.level}
@@ -287,7 +225,9 @@ const CourseList = () => {
 
                   <div className="absolute top-3 right-3">
                     <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/95 text-blue-700 shadow-sm backdrop-blur-sm">
-                      {course.is_free ? 'Miễn phí' : formatCurrency(course.price)}
+                      {course.is_free
+                        ? "Miễn phí"
+                        : formatCurrency(course.price)}
                     </span>
                   </div>
                 </div>
@@ -299,21 +239,22 @@ const CourseList = () => {
                       {course.title}
                     </h3>
                     <p className="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed">
-                      {course.description || 'Chương trình đào tạo toàn diện với lộ trình khoa học.'}
+                      {course.description ||
+                        "Chương trình đào tạo toàn diện với lộ trình khoa học."}
                     </p>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
                     <span className="flex items-center gap-1">
                       <HiBookOpen className="w-4 h-4 text-blue-500" />
-                      {course.total_lessons || 16} bài học
+                      {course.total_lessons || 0} bài học
                     </span>
                     <span className="flex items-center gap-1">
                       <HiClock className="w-4 h-4 text-emerald-500" />
-                      {formatDuration(course.total_duration || 480)}
+                      {formatDuration(course.total_duration || 0)}
                     </span>
                     <span className="font-medium text-amber-600 flex items-center gap-1">
-                      ★ {course.rating || '4.9'}
+                      {LEVEL_LABELS[course.level]}
                     </span>
                   </div>
                 </div>
@@ -321,10 +262,15 @@ const CourseList = () => {
                 {/* Card Action */}
                 <div className="bg-gray-50/80 px-5 py-3 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-[11px] text-gray-400">
-                    {course.enrolled_count || 120} học viên đã tham gia
+                    {course.student_count || 0} học viên đã tham gia
                   </span>
                   <Link to={`/student/course/${course.id}`}>
-                    <Button variant="primary" size="sm" icon={HiArrowRight} iconPosition="right">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={HiArrowRight}
+                      iconPosition="right"
+                    >
                       Xem chi tiết
                     </Button>
                   </Link>

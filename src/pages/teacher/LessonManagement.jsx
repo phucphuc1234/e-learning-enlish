@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   HiPlus,
   HiDocumentText,
@@ -11,22 +11,22 @@ import {
   HiVideoCamera,
   HiSpeakerWave,
   HiArrowLeft,
-} from 'react-icons/hi2';
-import toast from 'react-hot-toast';
-import lessonApi from '../../api/lessonApi';
-import courseApi from '../../api/courseApi';
-import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Modal from '../../components/common/Modal';
-import Badge from '../../components/common/Badge';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
-import { formatDuration } from '../../utils/helpers';
+} from "react-icons/hi2";
+import toast from "react-hot-toast";
+import lessonApi from "../../api/lessonApi";
+import courseApi from "../../api/courseApi";
+import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Modal from "../../components/common/Modal";
+import Badge from "../../components/common/Badge";
+import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Loading from "../../components/common/Loading";
+import EmptyState from "../../components/common/EmptyState";
+import { formatDuration } from "../../utils/helpers";
 
 const LessonManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedCourseId = searchParams.get('course_id') || '';
+  const selectedCourseId = searchParams.get("course_id") || "";
 
   const [courses, setCourses] = useState([]);
   const [lessons, setLessons] = useState([]);
@@ -37,12 +37,12 @@ const LessonManagement = () => {
   const [editingLesson, setEditingLesson] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    course_id: '',
-    content: '',
-    video_url: '',
-    audio_url: '',
-    document_url: '',
+    title: "",
+    course_id: "",
+    content: "",
+    video_url: "",
+    audio_url: "",
+    document_url: "",
     duration: 15,
     order_index: 1,
     is_published: 1,
@@ -61,12 +61,13 @@ const LessonManagement = () => {
         const list = res?.data || res || [];
         const cList = Array.isArray(list) ? list : list.courses || [];
         setCourses(cList);
+        if (!cList.length) setLoading(false);
         if (!selectedCourseId && cList.length > 0) {
           setSearchParams({ course_id: String(cList[0].id) });
         }
       } catch (err) {
         setCourses([]);
-        toast.error(err.message || 'Không tải được danh sách khóa học');
+        toast.error(err.message || "Không tải được danh sách khóa học");
       }
     };
     fetchCoursesList();
@@ -80,41 +81,11 @@ const LessonManagement = () => {
       const res = await lessonApi.getLessons({ course_id: selectedCourseId });
       const list = res?.data || res || [];
       const lList = Array.isArray(list) ? list : list.lessons || [];
-      setLessons(lList.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)));
+      setLessons(
+        lList.sort((a, b) => (a.order_index || 0) - (b.order_index || 0)),
+      );
     } catch {
-      // Sample mock lessons
-      setLessons([
-        {
-          id: 1,
-          title: 'Bài 1: Giới thiệu bài thi IELTS Listening Section 1 & Kỹ năng bắt số, tên riêng',
-          content: 'Nắm vững các dạng câu hỏi thường gặp trong Section 1 của bài thi IELTS...',
-          video_url: 'https://www.youtube.com/watch?v=sample1',
-          audio_url: 'https://example.com/audio1.mp3',
-          duration: 35,
-          order_index: 1,
-          is_published: 0,
-          exercise_count: 2,
-        },
-        {
-          id: 2,
-          title: 'Bài 2: Chiến lược nghe Maps & Plan Labeling',
-          content: 'Phân tích các từ chỉ phương hướng và cách làm bài tập bản đồ hiệu quả...',
-          video_url: 'https://www.youtube.com/watch?v=sample2',
-          duration: 45,
-          order_index: 2,
-          is_published: 0,
-          exercise_count: 3,
-        },
-        {
-          id: 3,
-          title: 'Bài 3: Luyện phát âm IPA - Nguyên âm đơn và đôi',
-          content: 'Cách phát âm chuẩn bảng mẫu tự quốc tế IPA...',
-          duration: 25,
-          order_index: 3,
-          is_published: 0,
-          exercise_count: 1,
-        },
-      ]);
+      setLessons([]);
     } finally {
       setLoading(false);
     }
@@ -129,12 +100,12 @@ const LessonManagement = () => {
   const handleOpenAdd = () => {
     setEditingLesson(null);
     setFormData({
-      title: '',
+      title: "",
       course_id: selectedCourseId,
-      content: '',
-      video_url: '',
-      audio_url: '',
-      document_url: '',
+      content: "",
+      video_url: "",
+      audio_url: "",
+      document_url: "",
       duration: 30,
       order_index: lessons.length + 1,
       is_published: 1,
@@ -145,12 +116,12 @@ const LessonManagement = () => {
   const handleOpenEdit = (lesson) => {
     setEditingLesson(lesson);
     setFormData({
-      title: lesson.title || '',
+      title: lesson.title || "",
       course_id: lesson.course_id || selectedCourseId,
-      content: lesson.content || '',
-      video_url: lesson.video_url || '',
-      audio_url: lesson.audio_url || '',
-      document_url: lesson.document_url || '',
+      content: lesson.content || "",
+      video_url: lesson.video_url || "",
+      audio_url: lesson.audio_url || "",
+      document_url: lesson.document_url || "",
       duration: lesson.duration || 30,
       order_index: lesson.order_index || 1,
       is_published: lesson.is_published ? 1 : 0,
@@ -161,7 +132,7 @@ const LessonManagement = () => {
   const handleSaveLesson = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
-      toast.error('Vui lòng nhập tiêu đề bài học!');
+      toast.error("Vui lòng nhập tiêu đề bài học!");
       return;
     }
 
@@ -169,15 +140,15 @@ const LessonManagement = () => {
     try {
       if (editingLesson) {
         await lessonApi.updateLesson(editingLesson.id, formData);
-        toast.success('Cập nhật bài học thành công!');
+        toast.success("Cập nhật bài học thành công!");
       } else {
         await lessonApi.createLesson(formData);
-        toast.success('Thêm bài học mới thành công!');
+        toast.success("Thêm bài học mới thành công!");
       }
       setModalOpen(false);
       fetchLessons();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi lưu bài học');
+      toast.error(err.message || "Lỗi khi lưu bài học");
     } finally {
       setFormLoading(false);
     }
@@ -193,12 +164,12 @@ const LessonManagement = () => {
     setDeleteLoading(true);
     try {
       await lessonApi.deleteLesson(lessonToDelete.id);
-      toast.success('Xóa bài học thành công!');
+      toast.success("Xóa bài học thành công!");
       setDeleteConfirmOpen(false);
       setLessonToDelete(null);
       fetchLessons();
     } catch (err) {
-      toast.error(err.message || 'Lỗi khi xóa bài học');
+      toast.error(err.message || "Lỗi khi xóa bài học");
     } finally {
       setDeleteLoading(false);
     }
@@ -206,7 +177,7 @@ const LessonManagement = () => {
 
   const handleReorder = async (index, direction) => {
     const newLessons = [...lessons];
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newLessons.length) return;
 
     // Swap
@@ -222,16 +193,23 @@ const LessonManagement = () => {
     setLessons(newLessons);
     try {
       await Promise.all([
-        lessonApi.updateLesson(newLessons[index].id, { order_index: index + 1 }),
-        lessonApi.updateLesson(newLessons[targetIndex].id, { order_index: targetIndex + 1 }),
+        lessonApi.updateLesson(newLessons[index].id, {
+          order_index: index + 1,
+        }),
+        lessonApi.updateLesson(newLessons[targetIndex].id, {
+          order_index: targetIndex + 1,
+        }),
       ]);
-      toast.success('Đã cập nhật thứ tự bài học!');
-    } catch {
-      // Local swap kept
+      toast.success("Đã cập nhật thứ tự bài học!");
+    } catch (error) {
+      toast.error(error.message);
+      fetchLessons();
     }
   };
 
-  const activeCourse = courses.find((c) => String(c.id) === String(selectedCourseId));
+  const activeCourse = courses.find(
+    (c) => String(c.id) === String(selectedCourseId),
+  );
 
   return (
     <div className="space-y-6">
@@ -247,7 +225,7 @@ const LessonManagement = () => {
             </Link>
             <span className="text-gray-400">/</span>
             <span className="text-xs text-gray-500 truncate max-w-xs">
-              {activeCourse?.title || 'Quản lý bài giảng'}
+              {activeCourse?.title || "Quản lý bài giảng"}
             </span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
@@ -295,7 +273,12 @@ const LessonManagement = () => {
             title="Khóa học chưa có bài giảng nào"
             message="Hãy bắt đầu soạn bài giảng để học viên có thể học tập và làm bài tập."
             action={
-              <Button variant="primary" size="sm" icon={HiPlus} onClick={handleOpenAdd}>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={HiPlus}
+                onClick={handleOpenAdd}
+              >
                 Thêm bài học đầu tiên
               </Button>
             }
@@ -329,8 +312,12 @@ const LessonManagement = () => {
                         <HiSpeakerWave className="w-3.5 h-3.5" /> Có Audio
                       </span>
                     )}
-                    <Badge variant={lesson.is_published ? 'success' : 'gray'} dot size="sm">
-                      {lesson.is_published ? 'Công khai' : 'Nháp'}
+                    <Badge
+                      variant={lesson.is_published ? "success" : "gray"}
+                      dot
+                      size="sm"
+                    >
+                      {lesson.is_published ? "Công khai" : "Nháp"}
                     </Badge>
                   </div>
                 </div>
@@ -351,7 +338,7 @@ const LessonManagement = () => {
                 <div className="flex items-center gap-0.5">
                   <button
                     type="button"
-                    onClick={() => handleReorder(idx, 'up')}
+                    onClick={() => handleReorder(idx, "up")}
                     disabled={idx === 0}
                     className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30 rounded transition-colors"
                     title="Đẩy lên"
@@ -360,7 +347,7 @@ const LessonManagement = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleReorder(idx, 'down')}
+                    onClick={() => handleReorder(idx, "down")}
                     disabled={idx === lessons.length - 1}
                     className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30 rounded transition-colors"
                     title="Đẩy xuống"
@@ -396,7 +383,7 @@ const LessonManagement = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingLesson ? 'Chỉnh Sửa Bài Học' : 'Tạo Bài Học Mới'}
+        title={editingLesson ? "Chỉnh Sửa Bài Học" : "Tạo Bài Học Mới"}
         size="lg"
         footer={
           <>
@@ -413,7 +400,7 @@ const LessonManagement = () => {
               loading={formLoading}
               onClick={handleSaveLesson}
             >
-              {editingLesson ? 'Lưu thay đổi' : 'Thêm bài học'}
+              {editingLesson ? "Lưu thay đổi" : "Thêm bài học"}
             </Button>
           </>
         }
@@ -422,7 +409,9 @@ const LessonManagement = () => {
           <Input
             label="Tiêu đề bài học"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             placeholder="Ví dụ: Bài 1: Tổng quan kỹ năng Listening Part 1..."
             required
           />
@@ -432,14 +421,21 @@ const LessonManagement = () => {
               label="Thời lượng ước tính (phút)"
               type="number"
               value={formData.duration}
-              onChange={(e) => setFormData({ ...formData, duration: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, duration: Number(e.target.value) })
+              }
               required
             />
             <Input
               label="Thứ tự hiển thị"
               type="number"
               value={formData.order_index}
-              onChange={(e) => setFormData({ ...formData, order_index: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  order_index: Number(e.target.value),
+                })
+              }
               required
             />
           </div>
@@ -447,7 +443,9 @@ const LessonManagement = () => {
           <Input
             label="Đường dẫn Video giảng dạy (YouTube / MP4 / Cloud)"
             value={formData.video_url}
-            onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, video_url: e.target.value })
+            }
             placeholder="https://www.youtube.com/watch?v=..."
             icon={HiVideoCamera}
           />
@@ -455,7 +453,9 @@ const LessonManagement = () => {
           <Input
             label="Đường dẫn file Audio (cho kỹ năng Listening)"
             value={formData.audio_url}
-            onChange={(e) => setFormData({ ...formData, audio_url: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, audio_url: e.target.value })
+            }
             placeholder="https://example.com/audio.mp3"
             icon={HiSpeakerWave}
           />
@@ -467,7 +467,9 @@ const LessonManagement = () => {
             <textarea
               rows={6}
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
               placeholder="Nhập nội dung lý thuyết, ví dụ minh họa, từ vựng trọng tâm..."
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700 font-sans"
             />
@@ -479,7 +481,12 @@ const LessonManagement = () => {
             </label>
             <select
               value={formData.is_published}
-              onChange={(e) => setFormData({ ...formData, is_published: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  is_published: Number(e.target.value),
+                })
+              }
               className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-gray-700"
             >
               <option value={1}>Công khai cho học viên</option>
