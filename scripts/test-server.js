@@ -5,16 +5,16 @@ import { createApp } from "../server/app.js";
 import { seedDemo } from "../server/seed.js";
 
 const dir = mkdtempSync(join(tmpdir(), "english-browser-"));
-const app = createApp({
+const app = await createApp({
   filename: join(dir, "test.sqlite"),
   disableRateLimit: true,
 });
-seedDemo(app.locals.store);
+await seedDemo(app.locals.store);
 const server = app.listen(4173, "127.0.0.1");
 for (const signal of ["SIGTERM", "SIGINT"])
   process.on(signal, () =>
-    server.close(() => {
-      app.locals.store.db.close();
+    server.close(async () => {
+      await app.locals.store.db.close();
       rmSync(dir, { recursive: true, force: true });
       process.exit(0);
     }),

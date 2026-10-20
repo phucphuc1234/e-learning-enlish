@@ -12,7 +12,8 @@
     "start": "node --env-file-if-exists=.env server/index.js",
     "seed:demo": "node --env-file-if-exists=.env server/seed.js",
     "admin:create": "node --env-file-if-exists=.env scripts/create-admin.js",
-    "test": "node --test tests/api.test.js",
+    "db:check": "node --env-file-if-exists=.env scripts/check-sqlserver.js",
+    "test": "node --test tests/api.test.js tests/sqlserver-store.test.js",
     "test:e2e": "playwright test",
     "format:check": "prettier --check server scripts src tests vite.config.js playwright.config.js"
   },
@@ -23,6 +24,7 @@
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.1",
     "helmet": "^8.3.0",
+    "mssql": "^12.7.10",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",

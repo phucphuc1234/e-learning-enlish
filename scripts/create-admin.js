@@ -14,9 +14,9 @@ if (process.env.ADMIN_PASSWORD.length < 12)
   throw new Error("Administrator password requires at least 12 characters");
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(process.env.ADMIN_EMAIL))
   throw new Error("Invalid email");
-const store = openDatabase();
+const store = await openDatabase();
 try {
-  store.insert("users", {
+  await store.insert("users", {
     email: process.env.ADMIN_EMAIL.trim().toLowerCase(),
     full_name: process.env.ADMIN_NAME.trim(),
     password_hash: hashPassword(process.env.ADMIN_PASSWORD),
@@ -25,5 +25,5 @@ try {
   });
   console.log("Administrator created.");
 } finally {
-  store.db.close();
+  await store.db.close();
 }

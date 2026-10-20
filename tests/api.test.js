@@ -10,14 +10,14 @@ import { seedDemo } from "../server/seed.js";
 import { openDatabase } from "../server/database.js";
 
 async function fixture(t, filename = ":memory:") {
-  const app = createApp({ filename, disableRateLimit: true });
-  seedDemo(app.locals.store);
+  const app = await createApp({ filename, disableRateLimit: true });
+  await seedDemo(app.locals.store);
   const server = app.listen(0, "127.0.0.1");
   await once(server, "listening");
   const base = `http://127.0.0.1:${server.address().port}/api`;
   t.after(async () => {
     await new Promise((resolve) => server.close(resolve));
-    app.locals.store.db.close();
+    await app.locals.store.db.close();
   });
   const request = async (
     path,
@@ -68,7 +68,7 @@ async function fixture(t, filename = ":memory:") {
   };
 }
 
-test("demo seed CLI handles Windows and POSIX entry paths without duplicating data", (t) => {
+test("demo seed CLI handles Windows and POSIX entry paths without duplicating data", async (t) => {
   const dir = mkdtempSync(join(tmpdir(), "english-seed-cli-"));
   const filename = join(dir, "seed.sqlite");
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -85,6 +85,7 @@ test("demo seed CLI handles Windows and POSIX entry paths without duplicating da
         env: {
           ...process.env,
           NODE_ENV: "development",
+          DB_DRIVER: "sqlite",
           DATABASE_PATH: filename,
         },
         encoding: "utf8",
@@ -92,12 +93,12 @@ test("demo seed CLI handles Windows and POSIX entry paths without duplicating da
     );
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /Demo data ready/);
-    const store = openDatabase(filename);
+    const store = await openDatabase(filename);
     try {
-      assert.equal(store.get("SELECT COUNT(*) AS n FROM users").n, 3);
-      assert.equal(store.get("SELECT COUNT(*) AS n FROM courses").n, 3);
+      assert.equal((await store.get("SELECT COUNT(*) AS n FROM users")).n, 3);
+      assert.equal((await store.get("SELECT COUNT(*) AS n FROM courses")).n, 3);
     } finally {
-      store.db.close();
+      await store.db.close();
     }
   }
 });
@@ -107,6 +108,41 @@ test("health and public catalog work; protected endpoints require authentication
   assert.equal((await request("/health")).database, "connected");
   assert.equal((await request("/catalog")).data.length, 3);
   await request("/courses", { status: 401 });
+});
+
+test("parallel exam starts share one attempt and parallel submits finalize once", async (t) => {
+  const { request, student, enroll, store } = await fixture(t);
+  await enroll();
+  const [first, second] = await Promise.all(
+    [1, 2].map(() =>
+      request("/exams/1/start", { method: "POST", token: student.token }),
+    ),
+  );
+  assert.equal(first.data.id, second.data.id);
+  assert.equal((await store.get("SELECT COUNT(*) AS n FROM attempts")).n, 1);
+  const body = { exam_result_id: first.data.id, answers: {} };
+  await Promise.all(
+    [1, 2].map(() =>
+      request("/exams/1/submit", {
+        method: "POST",
+        token: student.token,
+        body,
+      }),
+    ),
+  );
+  assert.equal(
+    (
+      await store.get(
+        "SELECT COUNT(*) AS n FROM notifications WHERE type='result'",
+      )
+    ).n,
+    1,
+  );
+  assert.equal(
+    (await store.get("SELECT status FROM attempts WHERE id=?", first.data.id))
+      .status,
+    "graded",
+  );
 });
 test("registration cannot grant elevated roles; validation and duplicate emails", async (t) => {
   const { request } = await fixture(t);
@@ -364,7 +400,7 @@ test("expired exams cannot use late answers, and cross-exam submission is reject
     body: { exam_result_id: a.id, answers },
     status: 400,
   });
-  store.update("attempts", a.id, {
+  await store.update("attempts", a.id, {
     deadline: new Date(Date.now() - 10000).toISOString(),
   });
   await request("/exams/1/draft", {
@@ -518,17 +554,20 @@ test("SQLite data survives closing and reopening the application; seed is repeat
   const dir = mkdtempSync(join(tmpdir(), "english-test-"));
   const filename = join(dir, "test.sqlite");
   t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const app = createApp({ filename, disableRateLimit: true });
-  seedDemo(app.locals.store);
-  seedDemo(app.locals.store);
-  assert.equal(app.locals.store.get("SELECT COUNT(*) AS n FROM courses").n, 3);
-  app.locals.store.db.close();
-  const second = createApp({ filename, disableRateLimit: true });
+  const app = await createApp({ filename, disableRateLimit: true });
+  await seedDemo(app.locals.store);
+  await seedDemo(app.locals.store);
   assert.equal(
-    second.locals.store.get("SELECT COUNT(*) AS n FROM lessons").n,
+    (await app.locals.store.get("SELECT COUNT(*) AS n FROM courses")).n,
+    3,
+  );
+  await app.locals.store.db.close();
+  const second = await createApp({ filename, disableRateLimit: true });
+  assert.equal(
+    (await second.locals.store.get("SELECT COUNT(*) AS n FROM lessons")).n,
     6,
   );
-  second.locals.store.db.close();
+  await second.locals.store.db.close();
 });
 
 test("answer-review policy cannot be bypassed through history, repeat submit or teacher-only endpoints", async (t) => {

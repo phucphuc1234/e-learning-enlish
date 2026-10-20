@@ -1,6 +1,10 @@
+import { forEachAsync } from "./async-utils.js";
 import { openDatabase, hashPassword, now } from "./database.js";
-
-export function seedDemo(store) {
+export async function seedDemo(store) {
+  if (store.driver === "mssql")
+    throw new Error(
+      "SQL Server đã có dữ liệu từ EnglishStudio_Full.sql; không chạy seed:demo vào database này.",
+    );
   if (process.env.NODE_ENV === "production")
     throw new Error("Demo seed is disabled in production");
   const { get, insert, run, transaction } = store;
@@ -10,10 +14,10 @@ export function seedDemo(store) {
     ["teacher@elearning.com", "Cô Minh Anh", "teacher"],
     ["student@elearning.com", "Nguyễn An", "student"],
   ];
-  transaction(() => {
+  await transaction(async () => {
     for (const [email, full_name, role] of accounts)
-      if (!get("SELECT id FROM users WHERE email=?", email)) {
-        insert("users", {
+      if (!(await get("SELECT id FROM users WHERE email=?", email))) {
+        await insert("users", {
           email,
           full_name,
           role,
@@ -21,12 +25,12 @@ export function seedDemo(store) {
           created_at: now(),
         });
       }
-    if (get("SELECT id FROM courses LIMIT 1")) return;
-    const teacher = get(
+    if (await get("SELECT id FROM courses LIMIT 1")) return;
+    const teacher = await get(
       "SELECT id FROM users WHERE email=?",
       "teacher@elearning.com",
     );
-    const program = insert("programs", {
+    const program = await insert("programs", {
       name: "Tiếng Anh nền tảng A1–A2",
       slug: "english-foundations",
       description: "Xây dựng ngữ pháp, từ vựng và giao tiếp căn bản.",
@@ -103,7 +107,7 @@ export function seedDemo(store) {
     ];
     const courseIds = [];
     for (const [title, description, level, units] of tracks) {
-      const c = insert("courses", {
+      const c = await insert("courses", {
         title,
         slug: title.toLowerCase().replaceAll(" ", "-").replace("&", "and"),
         description,
@@ -115,9 +119,10 @@ export function seedDemo(store) {
       });
       courseIds.push(c.id);
       const questionIds = [];
-      units.forEach(
-        ([lessonTitle, content, prompt, options, correct], index) => {
-          const l = insert("lessons", {
+      await forEachAsync(
+        units,
+        async ([lessonTitle, content, prompt, options, correct], index) => {
+          const l = await insert("lessons", {
             course_id: c.id,
             title: lessonTitle,
             content,
@@ -126,30 +131,32 @@ export function seedDemo(store) {
             duration: 15,
             created_at: now(),
           });
-          const e = insert("exercises", {
+          const e = await insert("exercises", {
             lesson_id: l.id,
             title: `Practice: ${lessonTitle}`,
             type: "multiple_choice",
             is_published: 1,
             created_at: now(),
           });
-          const q = insert("questions", {
+          const q = await insert("questions", {
             exercise_id: e.id,
             content: prompt,
             explanation: `Đáp án phù hợp là “${options[correct]}”. Xem lại phần lý thuyết trong bài học.`,
             created_at: now(),
           });
           questionIds.push(q.id);
-          options.forEach((content, i) =>
-            insert("answers", {
-              question_id: q.id,
-              content,
-              is_correct: i === correct ? 1 : 0,
-            }),
+          await forEachAsync(
+            options,
+            async (content, i) =>
+              await insert("answers", {
+                question_id: q.id,
+                content,
+                is_correct: i === correct ? 1 : 0,
+              }),
           );
         },
       );
-      const exam = insert("exams", {
+      const exam = await insert("exams", {
         course_id: c.id,
         title: `${title} — Progress check`,
         time_limit: 15,
@@ -157,11 +164,18 @@ export function seedDemo(store) {
         is_published: 1,
         created_at: now(),
       });
-      questionIds.forEach((q, i) =>
-        run("INSERT INTO exam_questions VALUES(?,?,?)", exam.id, q, i + 1),
+      await forEachAsync(
+        questionIds,
+        async (q, i) =>
+          await run(
+            "INSERT INTO exam_questions VALUES(?,?,?)",
+            exam.id,
+            q,
+            i + 1,
+          ),
       );
     }
-    const path = insert("learning_paths", {
+    const path = await insert("learning_paths", {
       teacher_id: teacher.id,
       program_id: program.id,
       title: "Từ nền tảng đến giao tiếp tự tin",
@@ -172,20 +186,22 @@ export function seedDemo(store) {
       is_published: 1,
       created_at: now(),
     });
-    courseIds.forEach((c, i) =>
-      run("INSERT INTO path_courses VALUES(?,?,?)", path.id, c, i + 1),
+    await forEachAsync(
+      courseIds,
+      async (c, i) =>
+        await run("INSERT INTO path_courses VALUES(?,?,?)", path.id, c, i + 1),
     );
   });
 }
 
 if (process.argv[1]?.replaceAll("\\", "/").endsWith("/seed.js")) {
-  const store = openDatabase();
+  const store = await openDatabase();
   try {
-    seedDemo(store);
+    await seedDemo(store);
     console.log(
       "Demo data ready. See README for local demo access. Existing records preserved.",
     );
   } finally {
-    store.db.close();
+    await store.db.close();
   }
 }

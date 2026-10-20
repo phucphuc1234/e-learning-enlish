@@ -1,12 +1,20 @@
 # English studio — Nền tảng học tiếng Anh
 
-Ứng dụng gồm React 18, Vite 7, Tailwind CSS 4, Express 5 và SQLite trên Node.js 24.
+Ứng dụng gồm React 18, Vite 7, Tailwind CSS 4, Express 5 trên Node.js 24;
+hỗ trợ **SQL Server** qua `mssql` và SQLite cho phát triển/kiểm thử.
 Frontend và backend cùng repository; dữ liệu được lưu thật, không dùng dữ liệu giả
-để thay thế lỗi API. Bản SQL Server cũ được giữ trong `legacy/` để tham khảo.
+để thay thế lỗi API. Bản SQL Server cũ được giữ trong `legacy/` để tham khảo;
+driver SQL Server đang dùng nằm ở `server/sqlserver-store.js`.
+
+**Đã chạy `EnglishStudio_Full.sql` trên Windows?** Làm theo
+[hướng dẫn copy code, cấu hình .env và kết nối SQL Server](docs/SQLSERVER_WINDOWS.md).
+Đặt `DB_DRIVER=mssql`, dùng database `ELearningEnglish_Demo`, chạy `npm install`,
+`npm run db:check`, rồi `npm run dev`. Không chạy `npm run seed:demo` với SQL Server.
 
 ## Chạy để phát triển
 
-Yêu cầu **Node.js 24** và npm. Trong thư mục repository:
+Yêu cầu **Node.js 24** và npm. Để chạy bản SQLite khi không cấu hình `.env`,
+hoặc khi đặt `DB_DRIVER=sqlite`, chạy trong thư mục repository:
 
 ```bash
 npm ci
@@ -51,7 +59,8 @@ viên chấm. Khóa có học phí chờ giáo viên duyệt sau khi xác nhận
 
 ## Cấu hình và dữ liệu
 
-Có thể sao chép `.env.example` thành `.env`. Các lệnh khởi động và seed đọc file
+Có thể sao chép `.env.example` thành `.env` để cấu hình **SQL Server**; thay mật khẩu
+SQL chỉ trên máy của bạn. Các lệnh khởi động và seed đọc file
 này bằng chức năng native của Node 24; biến đã export trong tiến trình được ưu tiên.
 
 | Biến            | Mặc định               | Công dụng                              |
@@ -59,9 +68,17 @@ này bằng chức năng native của Node 24; biến đã export trong tiến t
 | `PORT`          | `5000`                 | Cổng API; proxy dev dùng cùng giá trị  |
 | `HOST`          | `127.0.0.1`            | Địa chỉ API lắng nghe                  |
 | `DATABASE_PATH` | `.data/english.sqlite` | File SQLite, tính từ thư mục chạy lệnh |
+| `DB_DRIVER`     | `sqlite`               | `mssql` để sử dụng SQL Server          |
+| `DB_SERVER`     | `localhost`            | Máy chạy SQL Server                   |
+| `DB_PORT`       | `1433`                 | Cổng TCP của SQL Server                |
+| `DB_DATABASE`   | `ELearningEnglish_Demo` | Database SQL đã khởi tạo               |
+| `DB_USER`       | `sa`                   | SQL login do bạn cấu hình              |
+| `DB_PASSWORD`   | không có               | Điền trên máy, không commit            |
 | `NODE_ENV`      | phát triển             | Đặt `production` khi triển khai        |
 
-Không cần SQL Server, JWT secret hay dịch vụ bên ngoài cho luồng hiện tại. Mật khẩu
+Chế độ SQLite không cần SQL Server hoặc dịch vụ bên ngoài. Chế độ `mssql` cần SQL
+Server đã khởi tạo từ file SQL; kết nối thất bại sẽ dừng, không tự chuyển driver.
+Mật khẩu
 được băm bằng scrypt có salt; token phiên được lưu dưới dạng hash, có hạn dùng và
 có thể thu hồi. Đăng xuất thu hồi phiên; đổi mật khẩu thu hồi các phiên khác.
 
@@ -83,6 +100,10 @@ thời gian thi, lưu nháp, quyền xem đáp án, chấm tự luận và lưu 
 lại. Browser tests chạy trên desktop và mobile, dùng database tạm riêng; không làm
 thay đổi dữ liệu phát triển. Cần build trước browser tests vì chúng kiểm tra bản
 production đã biên dịch.
+
+API/browser tests mặc định dùng SQLite tạm; kiểm thử adapter SQL dùng pool mô phỏng.
+Chúng không xác nhận kết nối TDS tới SQL Server thật. Dùng `npm run db:check` trên
+máy có SQL Server và `.env` phù hợp để kiểm tra kết nối/dữ liệu thực tế.
 
 Trên Linux cloud, Chromium được cung cấp trong dependency kiểm thử, không cần tải
 browser từ CDN. Trên Windows/macOS, chạy `npx playwright install chromium` một lần.

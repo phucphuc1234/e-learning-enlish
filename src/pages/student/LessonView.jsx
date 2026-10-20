@@ -23,6 +23,7 @@ const LessonView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const openedAt = useRef(Date.now());
+  const studySession = useRef(crypto.randomUUID());
 
   const [lesson, setLesson] = useState(null);
   const [exercises, setExercises] = useState([]);
@@ -31,6 +32,8 @@ const LessonView = () => {
   const [completeLoading, setCompleteLoading] = useState(false);
 
   useEffect(() => {
+    openedAt.current = Date.now();
+    studySession.current = crypto.randomUUID();
     const fetchLesson = async () => {
       setLoading(true);
       try {
@@ -73,6 +76,7 @@ const LessonView = () => {
       await progressApi.updateProgress({
         lesson_id: id,
         is_completed: true,
+        session_id: studySession.current,
         time_spent: Math.floor((Date.now() - openedAt.current) / 1000),
       });
       setIsCompleted(true);
