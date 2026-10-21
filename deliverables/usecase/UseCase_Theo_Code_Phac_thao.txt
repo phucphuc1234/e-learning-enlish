@@ -1,0 +1,60 @@
+KHÁCH / NGƯỜI HỌC MỚI
+  |--- (UC01) Đăng ký tài khoản
+  |--- (UC06) Tra cứu khóa học
+
+
+HỌC VIÊN
+  |--- (UC02) Đăng nhập
+  |--- (UC03) Đăng xuất
+  |--- (UC04) Quản lý hồ sơ cá nhân
+  |--- (UC05) Đổi mật khẩu
+  |--- (UC06) Tra cứu khóa học
+  |--- (UC07) Đăng ký khóa học
+  |--- (UC09) Học bài và ghi nhận tiến độ
+  |--- (UC10) Làm bài tập
+  |--- (UC11) Làm bài kiểm tra/thi thử
+  |--- (UC12) Xem kết quả và lời giải
+  |--- (UC13) Theo dõi tiến độ học tập
+  |--- (UC14) Xem lộ trình học tập
+  |--- (UC15) Xem và đánh dấu thông báo
+
+
+GIÁO VIÊN
+  |--- (UC02) Đăng nhập
+  |--- (UC03) Đăng xuất
+  |--- (UC04) Quản lý hồ sơ cá nhân
+  |--- (UC05) Đổi mật khẩu
+  |--- (UC08) Duyệt đăng ký khóa học
+  |--- (UC15) Xem và đánh dấu thông báo
+  |--- (UC16) Quản lý khóa học
+  |--- (UC17) Quản lý bài học
+  |--- (UC18) Quản lý bài tập
+  |--- (UC19) Quản lý câu hỏi và đáp án
+  |--- (UC20) Quản lý bài kiểm tra
+  |--- (UC21) Xem tiến độ học viên
+  |--- (UC22) Chấm bài và nhận xét
+  |--- (UC23) Quản lý lộ trình học tập
+  |--- (UC27) Xem thống kê giảng dạy
+
+
+QUẢN TRỊ VIÊN
+  |--- (UC02) Đăng nhập
+  |--- (UC03) Đăng xuất
+  |--- (UC04) Quản lý hồ sơ cá nhân
+  |--- (UC05) Đổi mật khẩu
+  |--- (UC08) Duyệt đăng ký khóa học
+  |--- (UC15) Xem và đánh dấu thông báo
+  |--- (UC16) Quản lý khóa học
+  |--- (UC17) Quản lý bài học
+  |--- (UC18) Quản lý bài tập
+  |--- (UC19) Quản lý câu hỏi và đáp án
+  |--- (UC20) Quản lý bài kiểm tra
+  |--- (UC21) Xem tiến độ học viên
+  |--- (UC22) Chấm bài và nhận xét
+  |--- (UC23) Quản lý lộ trình học tập
+  |--- (UC24) Quản lý tài khoản
+  |--- (UC25) Cấp và thay đổi vai trò
+  |--- (UC26) Quản lý chương trình đào tạo
+  |--- (UC27) Xem thống kê giảng dạy
+  |--- (UC28) Xem thống kê toàn hệ thống
+
