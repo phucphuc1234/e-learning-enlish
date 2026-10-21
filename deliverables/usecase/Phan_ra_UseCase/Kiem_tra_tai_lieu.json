@@ -1,0 +1,426 @@
+{
+  "usecases": 28,
+  "actor_associations": 50,
+  "child_occurrences": 127,
+  "relation_counts": {
+    "include": 70,
+    "extend": 57
+  },
+  "pdf_pages": 28,
+  "diagrams": [
+    {
+      "id": "UC01",
+      "name": "Đăng ký tài khoản",
+      "actors": [
+        "KH"
+      ],
+      "children": 5,
+      "include": 5,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC02",
+      "name": "Đăng nhập",
+      "actors": [
+        "KH",
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "children": 5,
+      "include": 5,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC03",
+      "name": "Đăng xuất",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "children": 2,
+      "include": 2,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC04",
+      "name": "Quản lý hồ sơ cá nhân",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "children": 2,
+      "include": 1,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC05",
+      "name": "Đổi mật khẩu",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "children": 4,
+      "include": 4,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC06",
+      "name": "Tra cứu khóa học",
+      "actors": [
+        "KH",
+        "HV"
+      ],
+      "children": 4,
+      "include": 2,
+      "extend": 2,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC07",
+      "name": "Đăng ký khóa học",
+      "actors": [
+        "HV"
+      ],
+      "children": 4,
+      "include": 3,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC08",
+      "name": "Duyệt đăng ký khóa học",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 5,
+      "include": 4,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC09",
+      "name": "Học bài và ghi nhận tiến độ",
+      "actors": [
+        "HV"
+      ],
+      "children": 5,
+      "include": 2,
+      "extend": 3,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC10",
+      "name": "Làm bài tập",
+      "actors": [
+        "HV"
+      ],
+      "children": 5,
+      "include": 5,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC11",
+      "name": "Làm bài kiểm tra/thi thử",
+      "actors": [
+        "HV"
+      ],
+      "children": 5,
+      "include": 4,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC12",
+      "name": "Xem kết quả và lời giải",
+      "actors": [
+        "HV"
+      ],
+      "children": 5,
+      "include": 2,
+      "extend": 3,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC13",
+      "name": "Theo dõi tiến độ học tập",
+      "actors": [
+        "HV"
+      ],
+      "children": 5,
+      "include": 4,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC14",
+      "name": "Xem lộ trình học tập",
+      "actors": [
+        "HV"
+      ],
+      "children": 5,
+      "include": 4,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC15",
+      "name": "Xem và đánh dấu thông báo",
+      "actors": [
+        "HV",
+        "GV",
+        "AD"
+      ],
+      "children": 4,
+      "include": 1,
+      "extend": 3,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC16",
+      "name": "Quản lý khóa học",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 6,
+      "include": 1,
+      "extend": 5,
+      "png_size": [
+        1600,
+        1389
+      ]
+    },
+    {
+      "id": "UC17",
+      "name": "Quản lý bài học",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 6,
+      "include": 1,
+      "extend": 5,
+      "png_size": [
+        1600,
+        1389
+      ]
+    },
+    {
+      "id": "UC18",
+      "name": "Quản lý bài tập",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 6,
+      "include": 1,
+      "extend": 5,
+      "png_size": [
+        1600,
+        1389
+      ]
+    },
+    {
+      "id": "UC19",
+      "name": "Quản lý câu hỏi và đáp án",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 4,
+      "include": 1,
+      "extend": 3,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC20",
+      "name": "Quản lý bài kiểm tra",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 5,
+      "include": 1,
+      "extend": 4,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC21",
+      "name": "Xem tiến độ học viên",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 3,
+      "include": 1,
+      "extend": 2,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC22",
+      "name": "Chấm bài và nhận xét",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 5,
+      "include": 4,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC23",
+      "name": "Quản lý lộ trình học tập",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 5,
+      "include": 1,
+      "extend": 4,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC24",
+      "name": "Quản lý tài khoản",
+      "actors": [
+        "AD"
+      ],
+      "children": 7,
+      "include": 1,
+      "extend": 6,
+      "png_size": [
+        1600,
+        1574
+      ]
+    },
+    {
+      "id": "UC25",
+      "name": "Cấp và thay đổi vai trò",
+      "actors": [
+        "AD"
+      ],
+      "children": 3,
+      "include": 3,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC26",
+      "name": "Quản lý chương trình đào tạo",
+      "actors": [
+        "AD"
+      ],
+      "children": 5,
+      "include": 1,
+      "extend": 4,
+      "png_size": [
+        1600,
+        1204
+      ]
+    },
+    {
+      "id": "UC27",
+      "name": "Xem thống kê giảng dạy",
+      "actors": [
+        "GV",
+        "AD"
+      ],
+      "children": 3,
+      "include": 3,
+      "extend": 0,
+      "png_size": [
+        1600,
+        1046
+      ]
+    },
+    {
+      "id": "UC28",
+      "name": "Xem thống kê toàn hệ thống",
+      "actors": [
+        "AD"
+      ],
+      "children": 4,
+      "include": 3,
+      "extend": 1,
+      "png_size": [
+        1600,
+        1046
+      ]
+    }
+  ]
+}

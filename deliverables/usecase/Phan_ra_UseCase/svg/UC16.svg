@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1389" viewBox="0 0 1600 1389">
+<title>Phân rã use case UC16 – Quản lý khóa học</title>
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+<defs><marker id="open-arrow" viewBox="0 0 18 16" refX="17" refY="8" markerWidth="18" markerHeight="16" orient="auto" markerUnits="userSpaceOnUse"><path d="M1,1 L17,8 L1,15" fill="none" stroke="#FF4081" stroke-width="2"/></marker></defs>
+<text x="800" y="80" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="30" font-weight="bold" fill="#222222">Phân rã use case UC16 – Quản lý khóa học</text>
+<line x1="206" y1="594" x2="479.061" y2="661.636" fill="none" stroke="#333333" stroke-width="2"/>
+<line x1="206" y1="769" x2="463.227" y2="728.994" fill="none" stroke="#333333" stroke-width="2"/>
+<line x1="830" y1="701.5" x2="1050" y2="239" fill="none" stroke="#FF4081" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#open-arrow)"/>
+<line x1="1050" y1="424" x2="830" y2="701.5" fill="none" stroke="#FF4081" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#open-arrow)"/>
+<line x1="1050" y1="609" x2="830" y2="701.5" fill="none" stroke="#FF4081" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#open-arrow)"/>
+<line x1="1050" y1="794" x2="830" y2="701.5" fill="none" stroke="#FF4081" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#open-arrow)"/>
+<line x1="1050" y1="979" x2="830" y2="701.5" fill="none" stroke="#FF4081" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#open-arrow)"/>
+<line x1="1050" y1="1164" x2="830" y2="701.5" fill="none" stroke="#FF4081" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#open-arrow)"/>
+<ellipse cx="640" cy="701.5" rx="190" ry="75" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="640" y="701.5" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="25" font-weight="normal" fill="#111111">Quản lý khóa học</text>
+<ellipse cx="1265" cy="239" rx="215" ry="69" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="1265" y="211.17" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">UC16.1</text>
+<text x="1265" y="239" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">Xem danh sách khóa học được</text>
+<text x="1265" y="266.83" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">quản lý</text>
+<ellipse cx="1265" cy="424" rx="215" ry="69" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="1265" y="410.085" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">UC16.2</text>
+<text x="1265" y="437.915" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">Tìm kiếm hoặc lọc khóa học</text>
+<ellipse cx="1265" cy="609" rx="215" ry="69" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="1265" y="595.085" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">UC16.3</text>
+<text x="1265" y="622.915" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">Thêm khóa học</text>
+<ellipse cx="1265" cy="794" rx="215" ry="69" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="1265" y="780.085" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">UC16.4</text>
+<text x="1265" y="807.915" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">Sửa thông tin khóa học</text>
+<ellipse cx="1265" cy="979" rx="215" ry="69" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="1265" y="965.085" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">UC16.5</text>
+<text x="1265" y="992.915" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">Ẩn hoặc xuất bản khóa học</text>
+<ellipse cx="1265" cy="1164" rx="215" ry="69" fill="#FFF2CC" stroke="#FF4081" stroke-width="2"/>
+<text x="1265" y="1150.09" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">UC16.6</text>
+<text x="1265" y="1177.91" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="23" font-weight="normal" fill="#111111">Xóa khóa học</text>
+<g stroke="#333333" stroke-width="2.4" fill="none"><circle cx="173" cy="554" r="13"/><path d="M173,567 V612 M142,587 H204 M173,612 L143,647 M173,612 L203,647"/></g>
+<text x="173" y="673" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="22" font-weight="normal" fill="#333333">Giáo viên</text>
+<g stroke="#333333" stroke-width="2.4" fill="none"><circle cx="173" cy="729" r="13"/><path d="M173,742 V787 M142,762 H204 M173,787 L143,822 M173,787 L203,822"/></g>
+<text x="173" y="848" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="22" font-weight="normal" fill="#333333">Quản trị viên</text>
+<rect x="886.062" y="454.25" width="107.875" height="32" fill="#FFFFFF"/>
+<text x="940" y="470.25" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="21" font-weight="normal" fill="#FF4081">«include»</text>
+<rect x="887.82" y="546.75" width="104.359" height="32" fill="#FFFFFF"/>
+<text x="940" y="562.75" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="21" font-weight="normal" fill="#FF4081">«extend»</text>
+<rect x="887.82" y="639.25" width="104.359" height="32" fill="#FFFFFF"/>
+<text x="940" y="655.25" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="21" font-weight="normal" fill="#FF4081">«extend»</text>
+<rect x="887.82" y="731.75" width="104.359" height="32" fill="#FFFFFF"/>
+<text x="940" y="747.75" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="21" font-weight="normal" fill="#FF4081">«extend»</text>
+<rect x="887.82" y="824.25" width="104.359" height="32" fill="#FFFFFF"/>
+<text x="940" y="840.25" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="21" font-weight="normal" fill="#FF4081">«extend»</text>
+<rect x="887.82" y="916.75" width="104.359" height="32" fill="#FFFFFF"/>
+<text x="940" y="932.75" text-anchor="middle" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="21" font-weight="normal" fill="#FF4081">«extend»</text>
+<text x="100" y="1290.5" text-anchor="start" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="18" font-weight="normal" fill="#444444">«include»: bắt buộc trong luồng thành công; «extend»: tùy chọn hoặc có điều kiện.</text>
+<text x="100" y="1326.5" text-anchor="start" dominant-baseline="central" font-family="Arial, Liberation Sans, sans-serif" font-size="18" font-weight="normal" fill="#444444">Luồng cơ sở: xem danh sách; điểm mở rộng: chọn thao tác quản lý.</text>
+</svg>
