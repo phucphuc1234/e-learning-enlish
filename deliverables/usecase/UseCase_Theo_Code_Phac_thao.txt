@@ -1,5 +1,6 @@
 KHÁCH / NGƯỜI HỌC MỚI
   |--- (UC01) Đăng ký tài khoản
+  |--- (UC02) Đăng nhập
   |--- (UC06) Tra cứu khóa học
 
 

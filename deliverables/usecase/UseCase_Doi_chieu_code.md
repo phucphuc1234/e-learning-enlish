@@ -2,14 +2,14 @@
 
 Đối chiếu ngày 21/10/2026, source ứng dụng tại a85ded9 (các commit tài liệu sau đó không thay đổi src/server). Mã UC là mã phân tích, không phải hằng số trong code.
 
-Có 28 mục tiêu nghiệp vụ chính. Actor Đăng nhập là ba vai trò tài khoản sẽ sử dụng; không yêu cầu đã đăng nhập trước khi thực hiện use case này. Đăng ký công khai chỉ tạo student. Không có quy trình tự đăng ký để nhận role teacher.
+Có 28 mục tiêu nghiệp vụ chính. Khách được mở trang Đăng nhập; học viên, giáo viên và admin dùng chung chức năng này. Các actor chỉ có tài khoản, không cần đã xác thực trước khi đăng nhập. Mỗi UC xuất hiện một lần, nối tất cả actor liên quan. Đăng ký công khai chỉ tạo student. Không có quy trình tự đăng ký để nhận role teacher.
 
 ## Dẫn chứng từng use case
 
 | UC | Chức năng | Actor nghiệp vụ | Giao diện/thành phần | HTTP API thật |
 | --- | --- | --- | --- | --- |
 | UC01 | Đăng ký tài khoản | Khách | src/pages/auth/RegisterPage.jsx | POST /api/auth/register |
-| UC02 | Đăng nhập | Học viên, Giáo viên, Admin | src/pages/auth/LoginPage.jsx | POST /api/auth/login<br>GET /api/auth/profile |
+| UC02 | Đăng nhập | Khách, Học viên, Giáo viên, Admin | src/pages/auth/LoginPage.jsx | POST /api/auth/login<br>GET /api/auth/profile |
 | UC03 | Đăng xuất | Học viên, Giáo viên, Admin | src/contexts/AuthContext.jsx | POST /api/auth/logout |
 | UC04 | Quản lý hồ sơ cá nhân | Học viên, Giáo viên, Admin | src/pages/ProfilePage.jsx | GET /api/auth/profile<br>PUT /api/auth/profile |
 | UC05 | Đổi mật khẩu | Học viên, Giáo viên, Admin | src/pages/ProfilePage.jsx | PUT /api/auth/change-password |
